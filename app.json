@@ -14,10 +14,12 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
-      "userInterfaceStyle": "dark"
+      "userInterfaceStyle": "dark",
+      "bundleIdentifier": "com.relyt0801.trackfit"
     },
     "android": {
       "userInterfaceStyle": "dark",
+      "package": "com.relyt0801.trackfit",
       "adaptiveIcon": {
         "backgroundColor": "#0c0d11"
       }
