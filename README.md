@@ -16,7 +16,7 @@ Alle Daten werden lokal auf dem Gerät gespeichert (AsyncStorage, kein Backend).
 
 ## Stack
 
-- **Expo SDK 51** / React Native 0.74 / React 18
+- **Expo SDK 56** / React Native 0.85 / React 19
 - **TypeScript** (strict)
 - **react-native-svg** – Icons & Diagramme
 - **@react-native-async-storage/async-storage** – lokale Persistenz
