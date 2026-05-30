@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git *)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(python3 *)",
+      "Bash(pip *)",
+      "Bash(find *)",
+      "Bash(ls *)",
+      "Bash(cat *)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(grep *)",
+      "Bash(curl *)",
+      "mcp__233f22b9-8aaf-4828-bad0-2e49184a8aab__*",
+      "mcp__19f0dad7-f2d3-4f51-a4dc-ce93f6789a70__*",
+      "mcp__github__*"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_TOOL_RESULT_FILE\"; if echo \"$FILE\" | grep -qE \"\\.(tsx|jsx|html|css|scss)$\"; then echo \"[UX Feedback] UI file modified: $FILE — run /ux-review for automated UX analysis\"; fi'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '[TrackFit UX UI Pro Max] Session complete. Run /ux-review to audit all UI changes, /design to sync with Canva, or /feedback to get full UX feedback report.'"
+          }
+        ]
+      }
+    ]
+  }
+}
