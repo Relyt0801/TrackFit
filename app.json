@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "TrackFit",
+    "slug": "trackfit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "trackfit",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0c0d11",
+    "splash": {
+      "backgroundColor": "#0c0d11",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "userInterfaceStyle": "dark"
+    },
+    "android": {
+      "userInterfaceStyle": "dark",
+      "adaptiveIcon": {
+        "backgroundColor": "#0c0d11"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
