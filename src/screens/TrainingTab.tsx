@@ -1,8 +1,9 @@
 // TrainingTab.tsx — active training session: start screen, exercise cards, set entry
 // with faded "last time" placeholders, done-sinks-to-bottom, rest timer, finish.
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, TextStyle, View } from 'react-native';
+import { Alert, Pressable, ScrollView, TextStyle, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { COLORS, RADIUS } from '../theme';
 import { METRICS } from '../data/constants';
 import { muscleColor } from '../data/color';
@@ -23,72 +24,148 @@ import {
   ExerciseThumb,
   MuscleTag,
   Stepper,
+  pressedOpacity,
 } from '../components/ui';
 import { ExercisePickerSheet } from '../forms/ExerciseForms';
 import { FinishSummary } from '../store/store';
+import { success, tapLight, tapMedium, warning } from '../utils/haptics';
 
-// ── Rest timer ──
-function RestTimer() {
-  const [end, setEnd] = useState<number | null>(null);
+// Default rest after completing a set (seconds).
+const REST_DEFAULT = 90;
+const KEEP_AWAKE_TAG = 'trackfit-session';
+
+// ── Rest timer (controlled by TrainingTab so completing a set can auto-start it) ──
+function RestTimer({
+  endsAt,
+  onStart,
+  onAdjust,
+  onStop,
+  onExpire,
+}: {
+  endsAt: number | null;
+  onStart: (s: number) => void;
+  onAdjust: (delta: number) => void;
+  onStop: () => void;
+  onExpire: () => void;
+}) {
   const [now, setNow] = useState(Date.now());
+  const expiredRef = useRef(false);
+
   useEffect(() => {
-    if (!end) return;
+    if (!endsAt) return;
+    setNow(Date.now());
     const i = setInterval(() => setNow(Date.now()), 250);
     return () => clearInterval(i);
-  }, [end]);
-  const remaining = end ? Math.max(0, Math.ceil((end - now) / 1000)) : 0;
+  }, [endsAt]);
+
+  const remaining = endsAt ? Math.max(0, Math.ceil((endsAt - now) / 1000)) : 0;
+
   useEffect(() => {
-    if (end && remaining === 0) setEnd(null);
-  }, [remaining, end]);
-  const start = (s: number) => setEnd(Date.now() + s * 1000);
+    if (!endsAt) {
+      expiredRef.current = false;
+      return;
+    }
+    if (remaining === 0 && !expiredRef.current) {
+      expiredRef.current = true;
+      onExpire();
+    }
+  }, [remaining, endsAt, onExpire]);
+
+  if (endsAt && remaining > 0) {
+    return (
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Pressable
+          onPress={() => {
+            tapLight();
+            onAdjust(-15);
+          }}
+          accessibilityLabel="15 Sekunden weniger Pause"
+          style={({ pressed }) => [timerSideBtn, pressedOpacity(pressed)]}
+        >
+          <AppText style={{ color: COLORS.muted, fontSize: 12.5, fontWeight: '800' }}>−15s</AppText>
+        </Pressable>
+        <Pressable
+          onPress={onStop}
+          accessibilityLabel="Pause beenden"
+          style={({ pressed }) => [
+            {
+              flex: 1,
+              paddingVertical: 9,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: COLORS.accent,
+              backgroundColor: COLORS.accentTint,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 6,
+            },
+            pressedOpacity(pressed),
+          ]}
+        >
+          <Icon name="stop" size={14} color={COLORS.accent} />
+          <AppText style={{ color: COLORS.accent, fontSize: 15, fontWeight: '800', fontVariant: ['tabular-nums'] }}>
+            {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
+          </AppText>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            tapLight();
+            onAdjust(30);
+          }}
+          accessibilityLabel="30 Sekunden mehr Pause"
+          style={({ pressed }) => [timerSideBtn, pressedOpacity(pressed)]}
+        >
+          <AppText style={{ color: COLORS.muted, fontSize: 12.5, fontWeight: '800' }}>+30s</AppText>
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flexDirection: 'row', gap: 8 }}>
       {[60, 90, 120].map((s) => (
         <Pressable
           key={s}
-          onPress={() => start(s)}
-          style={{
-            flex: 1,
-            paddingVertical: 9,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: COLORS.border,
-            backgroundColor: COLORS.surface2,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 5,
+          onPress={() => {
+            tapLight();
+            onStart(s);
           }}
+          accessibilityLabel={`Pause ${s} Sekunden`}
+          style={({ pressed }) => [
+            {
+              flex: 1,
+              paddingVertical: 9,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: COLORS.border,
+              backgroundColor: COLORS.surface2,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 5,
+            },
+            pressedOpacity(pressed),
+          ]}
         >
           <Icon name="timer" size={14} color={COLORS.muted} />
           <AppText style={{ color: COLORS.muted, fontSize: 12.5, fontWeight: '700' }}>{s}s</AppText>
         </Pressable>
       ))}
-      {end && remaining > 0 ? (
-        <Pressable
-          onPress={() => setEnd(null)}
-          style={{
-            flex: 1.2,
-            paddingVertical: 9,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: COLORS.accent,
-            backgroundColor: COLORS.accentTint,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 5,
-          }}
-        >
-          <Icon name="stop" size={13} color={COLORS.accent} />
-          <AppText style={{ color: COLORS.accent, fontSize: 14, fontWeight: '800', fontVariant: ['tabular-nums'] }}>
-            {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
-          </AppText>
-        </Pressable>
-      ) : null}
     </View>
   );
 }
+
+const timerSideBtn: ViewStyle = {
+  paddingVertical: 9,
+  paddingHorizontal: 12,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: COLORS.border,
+  backgroundColor: COLORS.surface2,
+  alignItems: 'center',
+  justifyContent: 'center',
+};
 
 function fmtDur(sec: number): string {
   const h = Math.floor(sec / 3600);
@@ -111,6 +188,7 @@ function SetRow({
   onChange,
   onRemove,
   canRemove,
+  onComplete,
 }: {
   idx: number;
   set: SetEntry;
@@ -119,6 +197,7 @@ function SetRow({
   onChange: (s: SetEntry) => void;
   onRemove: () => void;
   canRemove: boolean;
+  onComplete?: () => void;
 }) {
   const done = !!set.done;
   const cols = Math.min(metrics.length, 2);
@@ -179,6 +258,10 @@ function SetRow({
               }
             });
           onChange(ns);
+          if (c && !done) {
+            success();
+            onComplete?.();
+          }
         }}
       />
     </View>
@@ -206,6 +289,7 @@ function ExerciseCard({
   done,
   onUpdate,
   onRemove,
+  onSetDone,
 }: {
   entry: SessionEntry;
   exercise: Exercise;
@@ -213,6 +297,7 @@ function ExerciseCard({
   done: boolean;
   onUpdate: (e: SessionEntry) => void;
   onRemove: () => void;
+  onSetDone: () => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -352,6 +437,7 @@ function ExerciseCard({
                 onChange={(ns) => updateSet(i, ns)}
                 onRemove={() => removeSet(i)}
                 canRemove={entry.sets.length > 1}
+                onComplete={onSetDone}
               />
             ))}
           </View>
@@ -439,16 +525,39 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [viewMenu, setViewMenu] = useState(false);
   const [now, setNow] = useState(Date.now());
+  const [restEnd, setRestEnd] = useState<number | null>(null);
   const exMap = useMemo(() => Object.fromEntries(exercises.map((e) => [e.id, e])), [exercises]);
 
   useEffect(() => {
-    if (!session) setViewMenu(false);
+    if (!session) {
+      setViewMenu(false);
+      setRestEnd(null);
+    }
   }, [session]);
   useEffect(() => {
     if (!session) return;
     const i = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(i);
   }, [session]);
+
+  // Keep the screen awake while a workout is in progress (phone often sits on a bench).
+  useEffect(() => {
+    if (!session) return;
+    activateKeepAwakeAsync(KEEP_AWAKE_TAG).catch(() => {});
+    return () => {
+      deactivateKeepAwake(KEEP_AWAKE_TAG).catch(() => {});
+    };
+  }, [session]);
+
+  // Rest-timer controls.
+  const startRest = (s: number) => setRestEnd(Date.now() + s * 1000);
+  const adjustRest = (delta: number) =>
+    setRestEnd((e) => (e ? Math.max(Date.now() + 1000, e + delta * 1000) : e));
+  const stopRest = () => setRestEnd(null);
+  const restExpired = () => {
+    warning();
+    setRestEnd(null);
+  };
 
   const greeting = useMemo(() => buildGreeting(profile.name), [profile.name, !!session, viewMenu]);
 
@@ -464,6 +573,7 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
       entries,
     });
     setViewMenu(false);
+    tapMedium();
   };
   const startSession = (planId: string | null) => {
     if (session) {
@@ -518,6 +628,7 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
         entries,
       });
     store.setSession(null);
+    success();
     onFinish(entries.length ? { count: entries.length, exIds: entries.map((e) => e.exerciseId) } : null);
   };
 
@@ -531,6 +642,8 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
         style={{ flex: 1 }}
         contentContainerStyle={{ paddingTop: topPad, paddingHorizontal: 16, paddingBottom: 20 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       >
         <View style={{ marginBottom: 18 }}>
           <AppText style={{ fontSize: 26, fontWeight: '800', color: COLORS.text, letterSpacing: -0.5, lineHeight: 29 }}>
@@ -578,18 +691,21 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
 
         <Pressable
           onPress={() => startSession(null)}
-          style={{
-            padding: 18,
-            borderRadius: RADIUS,
-            backgroundColor: session ? COLORS.surface : COLORS.accent,
-            borderWidth: session ? 1 : 0,
-            borderColor: COLORS.border,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 9,
-            marginBottom: 18,
-          }}
+          style={({ pressed }) => [
+            {
+              padding: 18,
+              borderRadius: RADIUS,
+              backgroundColor: session ? COLORS.surface : COLORS.accent,
+              borderWidth: session ? 1 : 0,
+              borderColor: COLORS.border,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 9,
+              marginBottom: 18,
+            },
+            pressedOpacity(pressed),
+          ]}
         >
           <Icon name="play" size={20} color={session ? COLORS.text : COLORS.accentInk} />
           <AppText style={{ fontSize: 16.5, fontWeight: '800', letterSpacing: 0.2, color: session ? COLORS.text : COLORS.accentInk }}>
@@ -616,16 +732,19 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
             <Pressable
               key={p.id}
               onPress={() => startSession(p.id)}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 12,
-                padding: 14,
-                borderRadius: RADIUS,
-                borderWidth: 1,
-                borderColor: COLORS.border,
-                backgroundColor: COLORS.surface,
-              }}
+              style={({ pressed }) => [
+                {
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                  padding: 14,
+                  borderRadius: RADIUS,
+                  borderWidth: 1,
+                  borderColor: COLORS.border,
+                  backgroundColor: COLORS.surface,
+                },
+                pressedOpacity(pressed),
+              ]}
             >
               <View
                 style={{
@@ -708,7 +827,13 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
         </View>
       </View>
 
-      <RestTimer />
+      <RestTimer
+        endsAt={restEnd}
+        onStart={startRest}
+        onAdjust={adjustRest}
+        onStop={stopRest}
+        onExpire={restExpired}
+      />
 
       <View style={{ flexDirection: 'row', gap: 10, marginVertical: 12 }}>
         <View style={statBox}>
@@ -762,23 +887,27 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
             prev={lastEntryFor(history, e.exerciseId, session.date)}
             onUpdate={(ne) => updateEntry(e.exerciseId, ne)}
             onRemove={() => removeEntry(e.exerciseId)}
+            onSetDone={() => startRest(REST_DEFAULT)}
           />
         ))}
       </View>
 
       <Pressable
         onPress={finish}
-        style={{
-          marginTop: 20,
-          paddingVertical: 15,
-          borderRadius: 14,
-          borderWidth: 1,
-          borderColor: COLORS.danger,
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-        }}
+        style={({ pressed }) => [
+          {
+            marginTop: 20,
+            paddingVertical: 15,
+            borderRadius: 14,
+            borderWidth: 1,
+            borderColor: COLORS.danger,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          },
+          pressedOpacity(pressed),
+        ]}
       >
         <Icon name="stop" size={16} color={COLORS.danger} />
         <AppText style={{ color: COLORS.danger, fontSize: 15, fontWeight: '800' }}>Training beenden</AppText>

@@ -16,6 +16,7 @@ import {
   MuscleTag,
   PrimaryButton,
   Sheet,
+  pressedOpacity,
 } from '../components/ui';
 import { SessionHeaderTitle } from '../components/SessionHeaderTitle';
 import { ExerciseEditorSheet, ExercisePickerSheet } from '../forms/ExerciseForms';
@@ -207,6 +208,8 @@ export function SettingsTab() {
       style={{ flex: 1 }}
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 16, paddingBottom: 28 }}
       showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      keyboardDismissMode="on-drag"
     >
       <SessionHeaderTitle title="Einstellungen" />
 
@@ -216,7 +219,11 @@ export function SettingsTab() {
             <Pressable
               key={p.id}
               onPress={() => setPlanEdit(p)}
-              style={[cardStyle, { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 13 }]}
+              style={({ pressed }) => [
+                cardStyle,
+                { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 13 },
+                pressedOpacity(pressed),
+              ]}
             >
               <View
                 style={{
@@ -271,7 +278,11 @@ export function SettingsTab() {
             <Pressable
               key={e.id}
               onPress={() => setExEdit(e)}
-              style={[cardStyle, { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 11 }]}
+              style={({ pressed }) => [
+                cardStyle,
+                { flexDirection: 'row', alignItems: 'center', gap: 11, padding: 11 },
+                pressedOpacity(pressed),
+              ]}
             >
               <View style={{ width: 46, height: 46 }}>
                 <ExerciseThumb h={46} label="" />

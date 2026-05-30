@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../theme';
 import { Icon } from './Icon';
 import { AppText } from './Text';
+import { selection } from '../utils/haptics';
 
 export type TabId = 'training' | 'stats' | 'settings';
 
@@ -33,8 +34,20 @@ export function TabBar({ tab, setTab }: { tab: TabId; setTab: (t: TabId) => void
         return (
           <Pressable
             key={t.id}
-            onPress={() => setTab(t.id)}
-            style={{ flex: 1, alignItems: 'center', gap: 4, paddingVertical: 4 }}
+            onPress={() => {
+              if (!on) selection();
+              setTab(t.id);
+            }}
+            accessibilityRole="tab"
+            accessibilityLabel={t.label}
+            accessibilityState={{ selected: on }}
+            style={({ pressed }) => ({
+              flex: 1,
+              alignItems: 'center',
+              gap: 4,
+              paddingVertical: 4,
+              opacity: pressed ? 0.6 : 1,
+            })}
           >
             <Icon name={t.icon} size={23} stroke={on ? 2.4 : 2} color={on ? COLORS.accent : COLORS.muted} />
             <AppText

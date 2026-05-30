@@ -8,7 +8,7 @@ import { useStore } from '../store/store';
 import { Exercise, MetricKey } from '../types';
 import { Icon } from '../components/Icon';
 import { AppText } from '../components/Text';
-import { Chip, EmptyState, MuscleTag, Segmented, Sheet } from '../components/ui';
+import { Chip, EmptyState, MuscleTag, Segmented, Sheet, pressedOpacity } from '../components/ui';
 import { SessionHeaderTitle } from '../components/SessionHeaderTitle';
 import { LineChart } from '../components/charts';
 
@@ -125,17 +125,20 @@ export function StatsTab({
       {/* exercise selector */}
       <Pressable
         onPress={() => setPickOpen(true)}
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-          padding: 12,
-          borderRadius: RADIUS,
-          borderWidth: 1,
-          borderColor: COLORS.border,
-          backgroundColor: COLORS.surface,
-          marginBottom: 12,
-        }}
+        style={({ pressed }) => [
+          {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            padding: 12,
+            borderRadius: RADIUS,
+            borderWidth: 1,
+            borderColor: COLORS.border,
+            backgroundColor: COLORS.surface,
+            marginBottom: 12,
+          },
+          pressedOpacity(pressed),
+        ]}
       >
         <View
           style={{
@@ -313,17 +316,20 @@ function ExerciseSelectSheet({
     <Pressable
       key={e.id}
       onPress={() => onPick(e.id)}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 11,
-        padding: 11,
-        borderRadius: RADIUS,
-        marginBottom: 7,
-        borderWidth: 1,
-        borderColor: e.id === current ? COLORS.accent : COLORS.border,
-        backgroundColor: e.id === current ? COLORS.accentTint : COLORS.surface2,
-      }}
+      style={({ pressed }) => [
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 11,
+          padding: 11,
+          borderRadius: RADIUS,
+          marginBottom: 7,
+          borderWidth: 1,
+          borderColor: e.id === current ? COLORS.accent : COLORS.border,
+          backgroundColor: e.id === current ? COLORS.accentTint : COLORS.surface2,
+        },
+        pressedOpacity(pressed),
+      ]}
     >
       <View style={{ flex: 1, minWidth: 0 }}>
         <AppText style={{ fontSize: 14, fontWeight: '700', color: hasData ? COLORS.text : COLORS.muted }}>{e.name}</AppText>

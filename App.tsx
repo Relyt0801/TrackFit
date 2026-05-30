@@ -1,10 +1,11 @@
 // App.tsx — root shell: load Manrope, provide the store, host the three tabs + tab bar
 // + toast. The prototype's device frame, Stage scaler and tweaks panel are intentionally
 // dropped; the app renders full-screen using safe-area insets.
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import {
   useFonts,
   Manrope_400Regular,
@@ -21,8 +22,15 @@ import { TrainingTab } from './src/screens/TrainingTab';
 import { StatsTab } from './src/screens/StatsTab';
 import { SettingsTab } from './src/screens/SettingsTab';
 
+// Keep the native splash up until fonts + persisted state are ready (no blank flash).
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
 function Screens() {
   const { hydrated } = useStore();
+
+  useEffect(() => {
+    if (hydrated) SplashScreen.hideAsync().catch(() => {});
+  }, [hydrated]);
   const [tab, setTab] = useState<TabId>('training');
   const [toast, setToast] = useState<string | null>(null);
   const [focusEx, setFocusEx] = useState<string | null>(null);

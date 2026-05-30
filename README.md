@@ -22,6 +22,24 @@ Alle Daten werden lokal auf dem Gerät gespeichert (AsyncStorage, kein Backend).
 - **@react-native-async-storage/async-storage** – lokale Persistenz
 - **@expo-google-fonts/manrope** – Schriftart Manrope
 - **react-native-safe-area-context** – Safe-Area-Insets
+- **expo-haptics** – haptisches Feedback
+- **expo-keep-awake** – Display bleibt im Training an
+- **expo-splash-screen** – sauberer Start ohne Flackern
+
+## UX-Feinschliff
+
+- **Haptik:** Erfolgs-Vibration beim Abhaken eines Satzes und beim Beenden, leichte
+  Ticks bei Timer/Tab-Wechsel, Warn-Vibration wenn die Pause vorbei ist.
+- **Smarter Rest-Timer:** startet automatisch nach jedem erledigten Satz (90 s),
+  lässt sich mit −15 s / +30 s anpassen, vibriert beim Ablauf (Phone in der Tasche).
+- **Display bleibt an** während eines laufenden Trainings.
+- **Tastatur-UX:** Stepper-Buttons bleiben bei offener Tastatur tippbar
+  (`keyboardShouldPersistTaps`), Zahlenfeld markiert beim Fokus, „Fertig"-Taste,
+  Tastatur schließt beim Scrollen.
+- **Press-Feedback** auf allen Buttons, Chips, Karten und Tabs.
+- **Barrierefreiheit:** `accessibilityRole`/`-Label`/`-State` für Tabs, Checkboxen,
+  Icon-Buttons und Stepper (Screenreader-tauglich).
+- **Splash-Screen** bleibt sichtbar, bis Schriften und gespeicherte Daten geladen sind.
 
 ## Setup & Start
 

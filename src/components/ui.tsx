@@ -21,10 +21,14 @@ import { muscleColor } from '../data/color';
 import { MetricKey } from '../types';
 import { AppText, AppTextInput } from './Text';
 import { Icon } from './Icon';
+import { selection } from '../utils/haptics';
 
 let uidCounter = 0;
 const useUniqueId = (prefix: string) =>
   useMemo(() => `${prefix}${++uidCounter}`, [prefix]);
+
+// Shared press-feedback: dim while held so every tap feels responsive.
+export const pressedOpacity = (pressed: boolean): ViewStyle => ({ opacity: pressed ? 0.6 : 1 });
 
 // ── Coloured muscle-group chip ──
 export function MuscleTag({ m, small }: { m: string; small?: boolean }) {
@@ -68,7 +72,8 @@ export function Chip({
   return (
     <Pressable
       onPress={onPress}
-      style={[
+      accessibilityRole="button"
+      style={({ pressed }) => [
         {
           paddingVertical: 7,
           paddingHorizontal: 13,
@@ -77,6 +82,7 @@ export function Chip({
           borderColor: active ? COLORS.accent : COLORS.border,
           backgroundColor: active ? COLORS.accent : COLORS.surface2,
         },
+        pressedOpacity(pressed),
         style,
       ]}
     >
@@ -102,6 +108,7 @@ export function IconBtn({
   bg = 'transparent',
   style,
   stroke = 2,
+  accessibilityLabel,
 }: {
   name: string;
   size?: number;
@@ -110,11 +117,15 @@ export function IconBtn({
   bg?: string;
   style?: StyleProp<ViewStyle>;
   stroke?: number;
+  accessibilityLabel?: string;
 }) {
   return (
     <Pressable
       onPress={onPress}
-      style={[
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? name}
+      hitSlop={6}
+      style={({ pressed }) => [
         {
           width: 38,
           height: 38,
@@ -123,6 +134,7 @@ export function IconBtn({
           alignItems: 'center',
           justifyContent: 'center',
         },
+        pressedOpacity(pressed),
         style,
       ]}
     >
@@ -188,11 +200,18 @@ export function Stepper({
         {m.unit ? ` ${m.unit}` : ''}
       </AppText>
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, width: '100%' }}>
-        <Pressable onPress={() => bump(-1)} style={stepBtn}>
+        <Pressable
+          onPress={() => bump(-1)}
+          accessibilityRole="button"
+          accessibilityLabel={`${m.label} verringern`}
+          style={({ pressed }) => [stepBtn, pressedOpacity(pressed)]}
+        >
           <Icon name="minus" size={15} color={COLORS.muted} />
         </Pressable>
         <AppTextInput
           keyboardType="decimal-pad"
+          returnKeyType="done"
+          selectTextOnFocus
           value={display}
           onChangeText={(t) => {
             const raw = t.replace(',', '.').replace(/[^0-9.]/g, '');
@@ -211,7 +230,12 @@ export function Stepper({
             color: has ? (accent ? COLORS.accent : COLORS.text) : COLORS.text,
           }}
         />
-        <Pressable onPress={() => bump(1)} style={stepBtn}>
+        <Pressable
+          onPress={() => bump(1)}
+          accessibilityRole="button"
+          accessibilityLabel={`${m.label} erhöhen`}
+          style={({ pressed }) => [stepBtn, pressedOpacity(pressed)]}
+        >
           <Icon name="plus" size={15} color={COLORS.muted} />
         </Pressable>
       </View>
@@ -324,7 +348,12 @@ export function Segmented({
         return (
           <Pressable
             key={String(val)}
-            onPress={() => onChange(val)}
+            onPress={() => {
+              if (!active) selection();
+              onChange(val);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
             style={{
               flex: 1,
               paddingVertical: 8,
@@ -363,16 +392,22 @@ export function Checkbox({
   return (
     <Pressable
       onPress={() => onChange(!checked)}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: 9,
-        borderWidth: checked ? 1 : 1.5,
-        borderColor: checked ? COLORS.accent : COLORS.border,
-        backgroundColor: checked ? COLORS.accent : 'transparent',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
+      accessibilityRole="checkbox"
+      accessibilityState={{ checked }}
+      hitSlop={8}
+      style={({ pressed }) => [
+        {
+          width: size,
+          height: size,
+          borderRadius: 9,
+          borderWidth: checked ? 1 : 1.5,
+          borderColor: checked ? COLORS.accent : COLORS.border,
+          backgroundColor: checked ? COLORS.accent : 'transparent',
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        pressedOpacity(pressed),
+      ]}
     >
       {checked ? <Icon name="check" size={size * 0.6} stroke={3} color={COLORS.accentInk} /> : null}
     </Pressable>
@@ -588,7 +623,9 @@ export function PrimaryButton({
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
-      style={[
+      accessibilityRole="button"
+      accessibilityState={{ disabled: !!disabled }}
+      style={({ pressed }) => [
         {
           width: '100%',
           paddingVertical: 15,
@@ -596,6 +633,7 @@ export function PrimaryButton({
           alignItems: 'center',
           backgroundColor: disabled ? COLORS.surface2 : COLORS.accent,
         },
+        !disabled && pressedOpacity(pressed),
         style,
       ]}
     >
