@@ -78,6 +78,38 @@ export function seriesFor(
   return pts;
 }
 
+// Pick the headline metric for an exercise and build its series — used by the
+// overview to render one compact sparkline per exercise without a metric picker.
+// Strength → heaviest weight per session (falls back to reps / duration);
+// cardio → distance per session (falls back to duration / level).
+export interface PrimarySeries {
+  series: SeriesPoint[];
+  label: string;
+  unit: string;
+}
+
+export function primarySeries(history: Session[], ex: {
+  id: string;
+  type: 'strength' | 'cardio';
+  metrics: MetricKey[];
+}): PrimarySeries {
+  const has = (m: MetricKey) => ex.metrics.includes(m);
+  let metric: MetricKey;
+  let agg: Aggregate = 'max';
+  let label = '';
+  let unit = '';
+  if (ex.type === 'cardio') {
+    if (has('distance')) { metric = 'distance'; agg = 'sum'; label = 'Distanz'; unit = 'km'; }
+    else if (has('duration')) { metric = 'duration'; agg = 'sum'; label = 'Dauer'; unit = 'min'; }
+    else { metric = 'level'; agg = 'max'; label = 'Stufe'; unit = ''; }
+  } else {
+    if (has('weight')) { metric = 'weight'; agg = 'max'; label = 'Gewicht'; unit = 'kg'; }
+    else if (has('reps')) { metric = 'reps'; agg = 'max'; label = 'Wdh'; unit = ''; }
+    else { metric = 'duration'; agg = 'max'; label = 'Dauer'; unit = 'min'; }
+  }
+  return { series: seriesFor(history, ex.id, metric, agg), label, unit };
+}
+
 // Total per-session training volume (Σ weight × reps) for an exercise.
 export function volumeSeries(history: Session[], exId: string): SeriesPoint[] {
   const out: SeriesPoint[] = [];
