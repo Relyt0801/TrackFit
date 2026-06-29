@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "TrackFit",
+    "slug": "trackfit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "trackfit",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0c0d11",
+    "splash": {
+      "backgroundColor": "#0c0d11",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "userInterfaceStyle": "dark",
+      "bundleIdentifier": "com.relyt0801.trackfit"
+    },
+    "android": {
+      "userInterfaceStyle": "dark",
+      "package": "com.relyt0801.trackfit",
+      "adaptiveIcon": {
+        "backgroundColor": "#0c0d11"
+      }
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
