@@ -7,6 +7,9 @@ import { COLORS } from '../theme';
 const P: Record<string, string> = {
   dumbbell: 'M6.5 6.5l11 11M3 9l3-3 3 3-3 3-3-3zm12 12l3-3 3 3-3 3-3-3zM7.5 16.5l9-9',
   chart: 'M4 20V10M10 20V4M16 20v-7M22 20H2',
+  grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+  trendUp: 'M3 17l6-6 4 4 8-8M21 7h-5M21 7v5',
+  trendDown: 'M3 7l6 6 4-4 8 8M21 17h-5M21 17v-5',
   gear: 'M12 15a3 3 0 100-6 3 3 0 000 6z',
   plus: 'M12 5v14M5 12h14',
   minus: 'M5 12h14',

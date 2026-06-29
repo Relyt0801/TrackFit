@@ -1,4 +1,4 @@
-// App.tsx — root shell: load Manrope, provide the store, host the three tabs + tab bar
+// App.tsx — root shell: load Manrope, provide the store, host the tabs + tab bar
 // + toast. The prototype's device frame, Stage scaler and tweaks panel are intentionally
 // dropped; the app renders full-screen using safe-area insets.
 import React, { useEffect, useRef, useState } from 'react';
@@ -19,6 +19,7 @@ import { StoreProvider, useStore, FinishSummary } from './src/store/store';
 import { TabBar, TabId } from './src/components/TabBar';
 import { Toast } from './src/components/Toast';
 import { TrainingTab } from './src/screens/TrainingTab';
+import { OverviewTab } from './src/screens/OverviewTab';
 import { StatsTab } from './src/screens/StatsTab';
 import { SettingsTab } from './src/screens/SettingsTab';
 
@@ -43,7 +44,7 @@ function Screens() {
   };
 
   const onFinish = (summary: FinishSummary | null) => {
-    setTab('stats');
+    setTab('overview');
     if (summary) {
       setFocusEx(summary.exIds[0]);
       toastFor(`Training gespeichert · ${summary.count} Übung${summary.count > 1 ? 'en' : ''}`);
@@ -52,9 +53,15 @@ function Screens() {
     }
   };
 
+  // Open the detailed per-exercise chart (Diagramme) focused on one exercise.
+  const openExercise = (id: string) => {
+    setFocusEx(id);
+    setTab('stats');
+  };
+
   if (!hydrated) return <View style={{ flex: 1, backgroundColor: COLORS.bg }} />;
 
-  const tabs: TabId[] = ['training', 'stats', 'settings'];
+  const tabs: TabId[] = ['training', 'overview', 'stats', 'settings'];
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.bg }}>
@@ -62,6 +69,7 @@ function Screens() {
         {tabs.map((id) => (
           <View key={id} style={[StyleSheet.absoluteFill, { display: tab === id ? 'flex' : 'none' }]}>
             {id === 'training' && <TrainingTab onFinish={onFinish} />}
+            {id === 'overview' && <OverviewTab onOpenExercise={openExercise} />}
             {id === 'stats' && <StatsTab focusEx={focusEx} setFocusEx={setFocusEx} />}
             {id === 'settings' && <SettingsTab />}
           </View>

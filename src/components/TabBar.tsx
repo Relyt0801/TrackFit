@@ -8,10 +8,11 @@ import { Icon } from './Icon';
 import { AppText } from './Text';
 import { selection } from '../utils/haptics';
 
-export type TabId = 'training' | 'stats' | 'settings';
+export type TabId = 'training' | 'overview' | 'stats' | 'settings';
 
 const TABS: { id: TabId; label: string; icon: string }[] = [
   { id: 'training', label: 'Training', icon: 'dumbbell' },
+  { id: 'overview', label: 'Übersicht', icon: 'grid' },
   { id: 'stats', label: 'Diagramme', icon: 'chart' },
   { id: 'settings', label: 'Einstellungen', icon: 'gear' },
 ];
