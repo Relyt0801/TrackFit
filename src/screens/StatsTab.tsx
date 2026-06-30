@@ -11,6 +11,7 @@ import { AppText } from '../components/Text';
 import { Chip, EmptyState, MuscleTag, Segmented, Sheet, pressedOpacity } from '../components/ui';
 import { SessionHeaderTitle } from '../components/SessionHeaderTitle';
 import { LineChart } from '../components/charts';
+import { ExerciseGlyph } from '../components/ExerciseIcon';
 
 interface MetricOpt {
   id: string;
@@ -150,7 +151,7 @@ export function StatsTab({
             justifyContent: 'center',
           }}
         >
-          <Icon name="chart" size={20} color={COLORS.accent} />
+          <ExerciseGlyph type={ex.type} size={22} color={COLORS.accent} />
         </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <AppText style={{ fontSize: 15.5, fontWeight: '800', color: COLORS.text }}>{ex.name}</AppText>
