@@ -22,6 +22,7 @@ import {
 } from '../components/ui';
 import { SessionHeaderTitle } from '../components/SessionHeaderTitle';
 import { Sparkline } from '../components/charts';
+import { ExerciseGlyph } from '../components/ExerciseIcon';
 
 type TypeFilter = 'all' | 'strength' | 'cardio';
 
@@ -281,8 +282,20 @@ function OverviewCard({
         pressedOpacity(pressed),
       ]}
     >
-      {/* header: name + chevron */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+      {/* header: category glyph + name + chevron */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 11 }}>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            backgroundColor: COLORS.accentTint,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ExerciseGlyph type={ex.type} size={ex.type === 'cardio' ? 22 : 24} color={COLORS.accent} />
+        </View>
         <View style={{ flex: 1, minWidth: 0 }}>
           <AppText numberOfLines={1} style={{ fontSize: 15.5, fontWeight: '800', color: COLORS.text }}>
             {ex.name}
