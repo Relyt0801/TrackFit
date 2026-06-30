@@ -4,19 +4,25 @@
   },
   "build": {
     "preview": {
+      "channel": "preview",
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
       }
     },
     "development": {
+      "channel": "development",
       "developmentClient": true,
       "distribution": "internal"
     },
     "production": {
+      "channel": "production",
       "android": {
         "buildType": "app-bundle"
       }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }
