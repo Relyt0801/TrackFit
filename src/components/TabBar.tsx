@@ -5,16 +5,19 @@ import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../theme';
 import { Icon } from './Icon';
+import { BrandGlyph, BrandGlyphName } from './ExerciseIcon';
 import { AppText } from './Text';
 import { selection } from '../utils/haptics';
 
 export type TabId = 'training' | 'overview' | 'stats' | 'settings';
 
-const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: 'training', label: 'Training', icon: 'dumbbell' },
+// Training and Einstellungen use the provided brand SVGs (dumbbell / double-gear);
+// the others use the built-in stroke icons.
+const TABS: { id: TabId; label: string; icon: string; glyph?: BrandGlyphName }[] = [
+  { id: 'training', label: 'Training', icon: 'dumbbell', glyph: 'dumbbell' },
   { id: 'overview', label: 'Übersicht', icon: 'grid' },
   { id: 'stats', label: 'Diagramme', icon: 'chart' },
-  { id: 'settings', label: 'Einstellungen', icon: 'gear' },
+  { id: 'settings', label: 'Einstellungen', icon: 'gear', glyph: 'gears' },
 ];
 
 export function TabBar({ tab, setTab }: { tab: TabId; setTab: (t: TabId) => void }) {
@@ -50,7 +53,11 @@ export function TabBar({ tab, setTab }: { tab: TabId; setTab: (t: TabId) => void
               opacity: pressed ? 0.6 : 1,
             })}
           >
-            <Icon name={t.icon} size={23} stroke={on ? 2.4 : 2} color={on ? COLORS.accent : COLORS.muted} />
+            {t.glyph ? (
+              <BrandGlyph name={t.glyph} size={24} color={on ? COLORS.accent : COLORS.muted} />
+            ) : (
+              <Icon name={t.icon} size={23} stroke={on ? 2.4 : 2} color={on ? COLORS.accent : COLORS.muted} />
+            )}
             <AppText
               style={{
                 fontSize: 10.5,
