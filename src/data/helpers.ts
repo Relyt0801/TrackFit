@@ -44,38 +44,50 @@ export function lastEntryFor(
 export type Aggregate = 'max' | 'sum' | 'avg' | '1rm' | 'first';
 
 // Build a time series for an exercise across history for a given metric/aggregate.
+// Multiple sessions on the SAME day are combined into a single point (per-day aggregation),
+// so training an exercise twice in one day yields one point, not two stacked on the same x.
 export function seriesFor(
   history: Session[],
   exId: string,
   metric: MetricKey,
   agg: Aggregate = 'max',
 ): SeriesPoint[] {
-  const pts: SeriesPoint[] = [];
-  const sorted = [...history].sort((a, b) => a.date.localeCompare(b.date));
-  for (const sess of sorted) {
+  const byDay = new Map<string, { vals: number[]; sets: SessionEntry['sets'] }>();
+  for (const sess of history) {
     const e = sess.entries.find((en) => en.exerciseId === exId);
     if (!e) continue;
     const vals = e.sets
       .map((s) => s[metric])
       .filter((v): v is number => typeof v === 'number' && !isNaN(v));
     if (!vals.length) continue;
-    let v: number;
-    if (agg === 'max') v = Math.max(...vals);
-    else if (agg === 'sum') v = vals.reduce((a, b) => a + b, 0);
-    else if (agg === 'avg') v = vals.reduce((a, b) => a + b, 0) / vals.length;
-    else if (agg === '1rm')
-      v = Math.max(
-        ...e.sets.map((s) =>
-          epley1RM(
-            typeof s.weight === 'number' ? s.weight : 0,
-            typeof s.reps === 'number' ? s.reps : 1,
-          ),
-        ),
-      );
-    else v = vals[0];
-    pts.push({ date: sess.date, value: Math.round(v * 100) / 100 });
+    let bucket = byDay.get(sess.date);
+    if (!bucket) {
+      bucket = { vals: [], sets: [] };
+      byDay.set(sess.date, bucket);
+    }
+    bucket.vals.push(...vals);
+    bucket.sets.push(...e.sets);
   }
-  return pts;
+  return [...byDay.keys()]
+    .sort()
+    .map((date) => {
+      const { vals, sets } = byDay.get(date)!;
+      let v: number;
+      if (agg === 'sum') v = vals.reduce((a, b) => a + b, 0);
+      else if (agg === 'avg') v = vals.reduce((a, b) => a + b, 0) / vals.length;
+      else if (agg === '1rm')
+        v = Math.max(
+          ...sets.map((s) =>
+            epley1RM(
+              typeof s.weight === 'number' ? s.weight : 0,
+              typeof s.reps === 'number' ? s.reps : 1,
+            ),
+          ),
+        );
+      else if (agg === 'first') v = vals[0];
+      else v = Math.max(...vals); // 'max' (default)
+      return { date, value: Math.round(v * 100) / 100 };
+    });
 }
 
 // Pick the headline metric for an exercise and build its series — used by the
@@ -103,29 +115,34 @@ export function primarySeries(history: Session[], ex: {
     else if (has('duration')) { metric = 'duration'; agg = 'sum'; label = 'Dauer'; unit = 'min'; }
     else { metric = 'level'; agg = 'max'; label = 'Stufe'; unit = ''; }
   } else {
-    if (has('weight')) { metric = 'weight'; agg = 'max'; label = 'Gewicht'; unit = 'kg'; }
-    else if (has('reps')) { metric = 'reps'; agg = 'max'; label = 'Wdh'; unit = 'Wdh'; }
+    // Prefer weight, but for bodyweight exercises (all weights 0) the weight curve is flat at
+    // 0 and tells you nothing — fall back to reps so the headline tracks real progress.
+    const weightSeries = has('weight') ? seriesFor(history, ex.id, 'weight', 'max') : [];
+    const weightUseful = weightSeries.some((p) => p.value > 0);
+    if (has('weight') && weightUseful) {
+      return { series: weightSeries, label: 'Gewicht', unit: 'kg' };
+    }
+    if (has('reps')) { metric = 'reps'; agg = 'max'; label = 'Wdh'; unit = 'Wdh'; }
+    else if (has('weight')) { metric = 'weight'; agg = 'max'; label = 'Gewicht'; unit = 'kg'; }
     else { metric = 'duration'; agg = 'max'; label = 'Dauer'; unit = 'min'; }
   }
   return { series: seriesFor(history, ex.id, metric, agg), label, unit };
 }
 
-// Total per-session training volume (Σ weight × reps) for an exercise.
+// Total training volume (Σ weight × reps) per day for an exercise (same-day sessions summed).
 export function volumeSeries(history: Session[], exId: string): SeriesPoint[] {
-  const out: SeriesPoint[] = [];
-  [...history]
-    .sort((a, b) => a.date.localeCompare(b.date))
-    .forEach((s) => {
-      const e = s.entries.find((en) => en.exerciseId === exId);
-      if (!e) return;
-      const v = e.sets.reduce(
-        (sum, st) =>
-          sum +
-          (typeof st.weight === 'number' ? st.weight : 0) *
-            (typeof st.reps === 'number' ? st.reps : 0),
-        0,
-      );
-      if (v > 0) out.push({ date: s.date, value: Math.round(v) });
-    });
-  return out;
+  const byDay = new Map<string, number>();
+  for (const s of history) {
+    const e = s.entries.find((en) => en.exerciseId === exId);
+    if (!e) continue;
+    const v = e.sets.reduce(
+      (sum, st) =>
+        sum +
+        (typeof st.weight === 'number' ? st.weight : 0) *
+          (typeof st.reps === 'number' ? st.reps : 0),
+      0,
+    );
+    if (v > 0) byDay.set(s.date, (byDay.get(s.date) || 0) + v);
+  }
+  return [...byDay.keys()].sort().map((date) => ({ date, value: Math.round(byDay.get(date)!) }));
 }
