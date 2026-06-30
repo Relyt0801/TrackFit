@@ -12,6 +12,9 @@ export const COLORS = {
   text: '#f3f5f8',
   muted: '#888e9c',
   danger: '#ff6f6f',
+  good: '#34d399',
+  goodTint: 'rgba(52,211,153,0.14)',
+  dangerTint: 'rgba(255,111,111,0.14)',
   accent: '#ff8a3d',
   accentInk: '#0d0f08',
   // color-mix(in srgb, accent X%, transparent) precomputed for #ff8a3d → rgb(255,138,61)
