@@ -22,6 +22,7 @@ import { TrainingTab } from './src/screens/TrainingTab';
 import { OverviewTab } from './src/screens/OverviewTab';
 import { StatsTab } from './src/screens/StatsTab';
 import { SettingsTab } from './src/screens/SettingsTab';
+import { useOtaUpdates } from './src/utils/updates';
 
 // Keep the native splash up until fonts + persisted state are ready (no blank flash).
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -82,6 +83,9 @@ function Screens() {
 }
 
 export default function App() {
+  // Pull the latest over-the-air update (if any) on launch — no store/APK reinstall needed.
+  useOtaUpdates();
+
   const [fontsLoaded] = useFonts({
     Manrope_400Regular,
     Manrope_500Medium,
