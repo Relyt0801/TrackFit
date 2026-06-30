@@ -104,7 +104,7 @@ export function primarySeries(history: Session[], ex: {
     else { metric = 'level'; agg = 'max'; label = 'Stufe'; unit = ''; }
   } else {
     if (has('weight')) { metric = 'weight'; agg = 'max'; label = 'Gewicht'; unit = 'kg'; }
-    else if (has('reps')) { metric = 'reps'; agg = 'max'; label = 'Wdh'; unit = ''; }
+    else if (has('reps')) { metric = 'reps'; agg = 'max'; label = 'Wdh'; unit = 'Wdh'; }
     else { metric = 'duration'; agg = 'max'; label = 'Dauer'; unit = 'min'; }
   }
   return { series: seriesFor(history, ex.id, metric, agg), label, unit };

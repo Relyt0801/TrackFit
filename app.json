@@ -7,7 +7,9 @@
     "scheme": "trackfit",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#0c0d11",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash-icon.png",
       "backgroundColor": "#0c0d11",
       "resizeMode": "contain"
     },
@@ -29,11 +31,13 @@
       "userInterfaceStyle": "dark",
       "package": "com.relyt0801.trackfit",
       "adaptiveIcon": {
-        "backgroundColor": "#0c0d11"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ff8a3d"
       }
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
     }
   }
 }
