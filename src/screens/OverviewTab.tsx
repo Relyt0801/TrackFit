@@ -210,29 +210,32 @@ function lastTrainingSummary(entry: SessionEntry | null, ex: Exercise): string {
 
   if (ex.type === 'cardio') {
     const d = sum('distance');
-    if (d != null) parts.push(`${fmtVal(d)} km`);
+    if (d != null && d > 0) parts.push(`${fmtVal(d)} km`);
     const t = sum('duration');
-    if (t != null) parts.push(`${fmtVal(t)} min`);
+    if (t != null && t > 0) parts.push(`${fmtVal(t)} min`);
     if (!parts.length) {
       const lv = max('level');
       if (lv != null) parts.push(`Stufe ${fmtVal(lv)}`);
     }
-  } else if (ex.metrics.includes('weight')) {
-    // heaviest set, plus the reps done at that weight
-    let top = sets[0];
-    for (const s of sets)
-      if (typeof s.weight === 'number' && (typeof top.weight !== 'number' || s.weight > top.weight)) top = s;
-    if (typeof top.weight === 'number') {
-      let str = `${fmtVal(top.weight)} kg`;
+  } else {
+    const maxW = max('weight');
+    if (ex.metrics.includes('weight') && maxW != null && maxW > 0) {
+      // heaviest set, plus the reps done at that weight
+      let top = sets[0];
+      for (const s of sets)
+        if (typeof s.weight === 'number' && (typeof top.weight !== 'number' || s.weight > top.weight)) top = s;
+      let str = `${fmtVal(top.weight as number)} kg`;
       if (typeof top.reps === 'number') str += ` · ${fmtVal(top.reps)} Wdh`;
       parts.push(str);
+    } else if (ex.metrics.includes('reps') || ex.metrics.includes('weight')) {
+      // bodyweight (0 kg) or reps-only → show the best rep count
+      const r = max('reps');
+      if (r != null) parts.push(`${fmtVal(r)} Wdh`);
+      else if (maxW != null) parts.push(`${fmtVal(maxW)} kg`);
+    } else if (ex.metrics.includes('duration')) {
+      const t = max('duration');
+      if (t != null) parts.push(`${fmtVal(t)} min`);
     }
-  } else if (ex.metrics.includes('reps')) {
-    const r = max('reps');
-    if (r != null) parts.push(`${fmtVal(r)} Wdh`);
-  } else if (ex.metrics.includes('duration')) {
-    const t = max('duration');
-    if (t != null) parts.push(`${fmtVal(t)} min`);
   }
   return parts.length ? parts.join(' · ') : '–';
 }
@@ -308,6 +311,14 @@ function OverviewCard({
       </View>
 
       {/* evaluation: last session values + change vs. previous + sparkline */}
+      {n === 0 ? (
+        <View style={{ marginTop: 12 }}>
+          <AppText style={{ fontSize: 13.5, fontWeight: '700', color: COLORS.muted }}>Noch nicht trainiert</AppText>
+          <AppText style={{ fontSize: 11.5, fontWeight: '600', color: COLORS.muted, marginTop: 2 }}>
+            Sobald du sie absolvierst, erscheint hier deine Auswertung.
+          </AppText>
+        </View>
+      ) : (
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 12, gap: 12 }}>
         <View style={{ flex: 1, minWidth: 0 }}>
           <AppText style={{ fontSize: 10, fontWeight: '700', letterSpacing: 0.5, color: COLORS.muted, textTransform: 'uppercase' }}>
@@ -354,6 +365,7 @@ function OverviewCard({
 
         {n >= 2 ? <Sparkline points={series} color={COLORS.accent} width={92} height={40} /> : null}
       </View>
+      )}
     </Pressable>
   );
 }

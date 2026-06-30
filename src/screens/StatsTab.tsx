@@ -26,13 +26,14 @@ const METRIC_OPTS: Record<string, MetricOpt[]> = {
   strength: [
     { id: 'weight', label: 'Gewicht', unit: ' kg', metric: 'weight', agg: 'max' },
     { id: '1rm', label: '1RM', unit: ' kg', metric: 'weight', agg: '1rm' },
-    { id: 'reps', label: 'Wdh', unit: '', metric: 'reps', agg: 'max' },
+    { id: 'reps', label: 'Wdh', unit: ' Wdh', metric: 'reps', agg: 'max' },
+    { id: 'duration', label: 'Dauer', unit: ' min', metric: 'duration', agg: 'max' },
     { id: 'volume', label: 'Volumen', unit: ' kg', special: 'volume' },
   ],
   cardio: [
     { id: 'distance', label: 'Distanz', unit: ' km', metric: 'distance', agg: 'sum' },
     { id: 'duration', label: 'Dauer', unit: ' min', metric: 'duration', agg: 'sum' },
-    { id: 'level', label: 'Stufe', unit: '', metric: 'level', agg: 'max' },
+    { id: 'level', label: 'Stufe', unit: ' Stufe', metric: 'level', agg: 'max' },
   ],
 };
 const RANGES = [
@@ -63,17 +64,24 @@ export function StatsTab({
   const [range, setRange] = useState<number>(84);
   const [pickOpen, setPickOpen] = useState(false);
 
+  // Apply an incoming focus request (e.g. tapping a card in the overview), then clear it.
+  // Kept separate from the default below so clearing focusEx never resets the user's choice.
   useEffect(() => {
-    const want =
-      focusEx && exMap[focusEx]
-        ? focusEx
-        : (withHistory[0] && withHistory[0].id) || (exercises[0] && exercises[0].id);
-    if (want && want !== exId) {
-      setExId(want);
+    if (focusEx && exMap[focusEx]) {
+      setExId(focusEx);
       if (setFocusEx) setFocusEx(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusEx, withHistory]);
+  }, [focusEx]);
+
+  // Pick a sensible default only when nothing valid is selected yet (first open / deleted ex).
+  useEffect(() => {
+    if (!exId || !exMap[exId]) {
+      const def = (withHistory[0] && withHistory[0].id) || (exercises[0] && exercises[0].id) || null;
+      if (def) setExId(def);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exId, withHistory, exercises]);
 
   const ex: Exercise | null = exId ? exMap[exId] : null;
   const opts = ex
