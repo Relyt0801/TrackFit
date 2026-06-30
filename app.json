@@ -31,8 +31,9 @@
       "userInterfaceStyle": "dark",
       "package": "com.relyt0801.trackfit",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ff8a3d"
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
       }
     },
     "web": {
