@@ -1,20 +1,20 @@
-// OverviewTab.tsx — "Übersicht": a compact, scannable progress board. Every exercise the
-// user has actually trained is shown by default as a small card (sparkline + current value +
-// trend). The selection can be narrowed by search / type or customised explicitly via a
-// sheet. Tapping a card opens the detailed per-exercise chart in the Diagramme tab.
+// OverviewTab.tsx — "Übersicht": a compact, scannable progress board for evaluating recent
+// training. Every exercise the user has actually trained is shown by default as a card with
+// the last session's headline value and a green/red change vs. the previous session, plus a
+// sparkline. The selection can be narrowed by search / type or customised via a sheet.
+// Tapping a card opens the detailed per-exercise chart in the Diagramme tab.
 import React, { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, RADIUS } from '../theme';
-import { fmtDateShort, primarySeries } from '../data/helpers';
+import { fmtDateShort, lastEntryFor, primarySeries } from '../data/helpers';
 import { useStore } from '../store/store';
-import { Exercise } from '../types';
+import { Exercise, SessionEntry, MetricKey } from '../types';
 import { Icon } from '../components/Icon';
 import { AppText, AppTextInput } from '../components/Text';
 import {
   Checkbox,
   EmptyState,
-  MuscleTag,
   Segmented,
   Sheet,
   PrimaryButton,
@@ -22,6 +22,7 @@ import {
 } from '../components/ui';
 import { SessionHeaderTitle } from '../components/SessionHeaderTitle';
 import { Sparkline } from '../components/charts';
+import { ExerciseGlyph } from '../components/ExerciseIcon';
 
 type TypeFilter = 'all' | 'strength' | 'cardio';
 
@@ -194,6 +195,51 @@ export function OverviewTab({ onOpenExercise }: { onOpenExercise: (id: string) =
   );
 }
 
+const fmtVal = (v: number) => String(Math.round(v * 100) / 100);
+
+// The concrete headline values of the last logged session, e.g. "70 kg · 10 Wdh" (top set),
+// "5.2 km · 28 min" (cardio) — what the user actually did last time.
+function lastTrainingSummary(entry: SessionEntry | null, ex: Exercise): string {
+  if (!entry || !entry.sets.length) return '–';
+  const sets = entry.sets;
+  const nums = (k: MetricKey) =>
+    sets.map((s) => s[k]).filter((v): v is number => typeof v === 'number' && !isNaN(v));
+  const max = (k: MetricKey) => (nums(k).length ? Math.max(...nums(k)) : null);
+  const sum = (k: MetricKey) => (nums(k).length ? nums(k).reduce((a, b) => a + b, 0) : null);
+  const parts: string[] = [];
+
+  if (ex.type === 'cardio') {
+    const d = sum('distance');
+    if (d != null && d > 0) parts.push(`${fmtVal(d)} km`);
+    const t = sum('duration');
+    if (t != null && t > 0) parts.push(`${fmtVal(t)} min`);
+    if (!parts.length) {
+      const lv = max('level');
+      if (lv != null) parts.push(`Stufe ${fmtVal(lv)}`);
+    }
+  } else {
+    const maxW = max('weight');
+    if (ex.metrics.includes('weight') && maxW != null && maxW > 0) {
+      // heaviest set, plus the reps done at that weight
+      let top = sets[0];
+      for (const s of sets)
+        if (typeof s.weight === 'number' && (typeof top.weight !== 'number' || s.weight > top.weight)) top = s;
+      let str = `${fmtVal(top.weight as number)} kg`;
+      if (typeof top.reps === 'number') str += ` · ${fmtVal(top.reps)} Wdh`;
+      parts.push(str);
+    } else if (ex.metrics.includes('reps') || ex.metrics.includes('weight')) {
+      // bodyweight (0 kg) or reps-only → show the best rep count
+      const r = max('reps');
+      if (r != null) parts.push(`${fmtVal(r)} Wdh`);
+      else if (maxW != null) parts.push(`${fmtVal(maxW)} kg`);
+    } else if (ex.metrics.includes('duration')) {
+      const t = max('duration');
+      if (t != null) parts.push(`${fmtVal(t)} min`);
+    }
+  }
+  return parts.length ? parts.join(' · ') : '–';
+}
+
 function OverviewCard({
   ex,
   history,
@@ -203,81 +249,123 @@ function OverviewCard({
   history: ReturnType<typeof useStore>['state']['history'];
   onPress: () => void;
 }) {
-  const { series, label, unit } = useMemo(() => primarySeries(history, ex), [history, ex]);
+  const { series, unit } = useMemo(() => primarySeries(history, ex), [history, ex]);
+  const lastEntry = useMemo(() => lastEntryFor(history, ex.id), [history, ex.id]);
 
-  const cur = series.length ? series[series.length - 1].value : null;
-  const first = series.length ? series[0].value : null;
-  const delta = cur != null && first != null ? cur - first : null;
-  const pct = delta != null && first ? Math.round((delta / first) * 100) : null;
-  const trendUp = delta != null && delta > 0;
-  const trendDown = delta != null && delta < 0;
-  const trendColor = trendUp ? COLORS.accent : trendDown ? COLORS.danger : COLORS.muted;
+  const n = series.length;
+  const lastV = n ? series[n - 1].value : null;
+  const prevV = n >= 2 ? series[n - 2].value : null;
+  const delta = lastV != null && prevV != null ? Math.round((lastV - prevV) * 100) / 100 : null;
+  const up = delta != null && delta > 0;
+  const down = delta != null && delta < 0;
+  const dColor = up ? COLORS.good : down ? COLORS.danger : COLORS.muted;
+  const dTint = up ? COLORS.goodTint : down ? COLORS.dangerTint : COLORS.surface2;
 
-  const fmt = (v: number) => Math.round(v * 100) / 100;
-  const lastDateStr = series.length ? fmtDateShort(series[series.length - 1].date) : '–';
+  const summary = lastTrainingSummary(lastEntry, ex);
+  const lastDateStr = n ? fmtDateShort(series[n - 1].date) : '–';
+  const deltaStr =
+    delta != null
+      ? `${delta > 0 ? '+' : delta < 0 ? '−' : '±'}${fmtVal(Math.abs(delta))}${unit ? ' ' + unit : ''}`
+      : null;
 
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${ex.name} öffnen`}
+      accessibilityLabel={`${ex.name}, Details öffnen`}
       style={({ pressed }) => [
         {
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-          padding: 12,
+          padding: 14,
           borderRadius: RADIUS,
           borderWidth: 1,
           borderColor: COLORS.border,
           backgroundColor: COLORS.surface,
-          marginBottom: 9,
+          marginBottom: 10,
         },
         pressedOpacity(pressed),
       ]}
     >
-      {/* identity */}
-      <View style={{ flex: 1, minWidth: 0 }}>
-        <AppText numberOfLines={1} style={{ fontSize: 14.5, fontWeight: '800', color: COLORS.text }}>
-          {ex.name}
-        </AppText>
-        <AppText numberOfLines={1} style={{ fontSize: 11.5, color: COLORS.muted, fontWeight: '600', marginTop: 1 }}>
-          {ex.equipment} · zuletzt {lastDateStr}
-        </AppText>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 5, marginTop: 7 }}>
-          {ex.muscles.slice(0, 2).map((m) => (
-            <MuscleTag key={m} m={m} small />
-          ))}
+      {/* header: category glyph + name + chevron */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 11 }}>
+        <View
+          style={{
+            width: 40,
+            height: 40,
+            borderRadius: 12,
+            backgroundColor: COLORS.accentTint,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <ExerciseGlyph type={ex.type} size={ex.type === 'cardio' ? 22 : 24} color={COLORS.accent} />
         </View>
-      </View>
-
-      {/* graph + value */}
-      <View style={{ alignItems: 'flex-end' }}>
-        <Sparkline points={series} color={trendUp || !trendDown ? COLORS.accent : COLORS.danger} width={84} height={30} />
-        <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 3, marginTop: 4 }}>
-          <AppText style={{ fontSize: 15.5, fontWeight: '800', color: COLORS.text, fontVariant: ['tabular-nums'] }}>
-            {cur != null ? fmt(cur) : '–'}
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <AppText numberOfLines={1} style={{ fontSize: 15.5, fontWeight: '800', color: COLORS.text }}>
+            {ex.name}
           </AppText>
-          {unit ? <AppText style={{ fontSize: 10.5, fontWeight: '700', color: COLORS.muted }}>{unit}</AppText> : null}
+          <AppText numberOfLines={1} style={{ fontSize: 11.5, color: COLORS.muted, fontWeight: '600', marginTop: 1 }}>
+            {ex.equipment} · {ex.type === 'cardio' ? 'Cardio' : 'Kraft'}
+          </AppText>
         </View>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 1, height: 14 }}>
-          {delta != null && delta !== 0 ? (
-            <>
-              <Icon name={trendUp ? 'trendUp' : 'trendDown'} size={12} color={trendColor} stroke={2.4} />
-              <AppText style={{ fontSize: 11, fontWeight: '800', color: trendColor, fontVariant: ['tabular-nums'] }}>
-                {(delta > 0 ? '+' : '') + fmt(delta)}
-                {pct != null ? ` (${pct > 0 ? '+' : ''}${pct}%)` : ''}
-              </AppText>
-            </>
-          ) : (
-            <AppText style={{ fontSize: 11, fontWeight: '700', color: COLORS.muted }}>
-              {label}
-            </AppText>
-          )}
-        </View>
+        <Icon name="chevR" size={17} color={COLORS.muted} />
       </View>
 
-      <Icon name="chevR" size={16} color={COLORS.muted} />
+      {/* evaluation: last session values + change vs. previous + sparkline */}
+      {n === 0 ? (
+        <View style={{ marginTop: 12 }}>
+          <AppText style={{ fontSize: 13.5, fontWeight: '700', color: COLORS.muted }}>Noch nicht trainiert</AppText>
+          <AppText style={{ fontSize: 11.5, fontWeight: '600', color: COLORS.muted, marginTop: 2 }}>
+            Sobald du sie absolvierst, erscheint hier deine Auswertung.
+          </AppText>
+        </View>
+      ) : (
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginTop: 12, gap: 12 }}>
+        <View style={{ flex: 1, minWidth: 0 }}>
+          <AppText style={{ fontSize: 10, fontWeight: '700', letterSpacing: 0.5, color: COLORS.muted, textTransform: 'uppercase' }}>
+            Letztes Training · {lastDateStr}
+          </AppText>
+          <AppText numberOfLines={1} style={{ fontSize: 19, fontWeight: '800', color: COLORS.text, marginTop: 3, fontVariant: ['tabular-nums'] }}>
+            {summary}
+          </AppText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 7, marginTop: 7 }}>
+            {deltaStr ? (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 3,
+                  backgroundColor: dTint,
+                  borderRadius: 999,
+                  paddingVertical: 3,
+                  paddingHorizontal: 8,
+                }}
+              >
+                {up || down ? <Icon name={up ? 'trendUp' : 'trendDown'} size={12} color={dColor} stroke={2.6} /> : null}
+                <AppText style={{ fontSize: 12, fontWeight: '800', color: dColor, fontVariant: ['tabular-nums'] }}>
+                  {deltaStr}
+                </AppText>
+              </View>
+            ) : (
+              <View
+                style={{
+                  backgroundColor: COLORS.surface2,
+                  borderRadius: 999,
+                  paddingVertical: 3,
+                  paddingHorizontal: 8,
+                }}
+              >
+                <AppText style={{ fontSize: 11.5, fontWeight: '700', color: COLORS.muted }}>Erstes Training</AppText>
+              </View>
+            )}
+            <AppText style={{ fontSize: 11, fontWeight: '600', color: COLORS.muted }}>
+              {deltaStr ? 'ggü. Training davor' : 'noch kein Vergleich'}
+            </AppText>
+          </View>
+        </View>
+
+        {n >= 2 ? <Sparkline points={series} color={COLORS.accent} width={92} height={40} /> : null}
+      </View>
+      )}
     </Pressable>
   );
 }

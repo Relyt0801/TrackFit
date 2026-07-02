@@ -110,6 +110,12 @@ export function LineChart({
         </LinearGradient>
       </Defs>
 
+      {unit ? (
+        <SvgText x={2} y={11} fontSize={9} fontWeight="700" fill={COLORS.muted}>
+          {unit}
+        </SvgText>
+      ) : null}
+
       {Array.from({ length: yticks + 1 }).map((_, i) => {
         const v = yMin + (yMax - yMin) * (i / yticks);
         const yy = y(v);
@@ -160,13 +166,18 @@ export function LineChart({
         />
       ))}
 
-      <G x={Math.min(last.x, W - padR - 30)} y={Math.max(last.y - 14, padT + 6)}>
-        <Rect x={-2} y={-12} width={52} height={17} rx={5} fill={color} />
-        <SvgText x={24} y={0} textAnchor="middle" fontSize={10.5} fontWeight="800" fill={COLORS.accentInk}>
-          {last.v}
-          {unit}
-        </SvgText>
-      </G>
+      {(() => {
+        const lbl = `${last.v}${unit ? ' ' + unit : ''}`;
+        const bw = Math.max(46, lbl.length * 6.4 + 14);
+        return (
+          <G x={Math.min(last.x, W - padR - bw + 2)} y={Math.max(last.y - 14, padT + 6)}>
+            <Rect x={-2} y={-12} width={bw} height={17} rx={5} fill={color} />
+            <SvgText x={-2 + bw / 2} y={0} textAnchor="middle" fontSize={10.5} fontWeight="800" fill={COLORS.accentInk}>
+              {lbl}
+            </SvgText>
+          </G>
+        );
+      })()}
     </Svg>
   );
 }
