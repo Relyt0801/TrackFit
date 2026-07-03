@@ -518,6 +518,13 @@ function buildGreeting(name: string) {
 
 const isDone = (entry: SessionEntry) => entry.sets.length > 0 && entry.sets.every((s) => s.done);
 
+const getPlanIconName = (plan: { exerciseIds: string[] }, exMap: Record<string, Exercise>) => {
+  const exercises = plan.exerciseIds.map((id) => exMap[id]).filter(Boolean);
+  if (exercises.length === 0) return 'dumbbell';
+  const allCardio = exercises.every((ex) => ex.type === 'cardio');
+  return allCardio ? 'stopwatch' : 'dumbbell';
+};
+
 export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) => void }) {
   const insets = useSafeAreaInsets();
   const store = useStore();
@@ -756,7 +763,7 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
                   justifyContent: 'center',
                 }}
               >
-                <Icon name="dumbbell" size={22} color={COLORS.accent} />
+                <Icon name={getPlanIconName(p, exMap)} size={22} color={COLORS.accent} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <AppText style={{ fontSize: 15, fontWeight: '800', color: COLORS.text }}>{p.name}</AppText>
