@@ -285,7 +285,7 @@ export function SettingsTab() {
               ]}
             >
               <View style={{ width: 46, height: 46 }}>
-                <ExerciseThumb h={46} label="" />
+                <ExerciseThumb h={46} label="" exercise={e} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <AppText style={{ fontSize: 14, fontWeight: '700', color: COLORS.text }}>{e.name}</AppText>

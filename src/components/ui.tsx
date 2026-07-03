@@ -418,12 +418,15 @@ export function Checkbox({
 export function ExerciseThumb({
   label = 'Übungsbild',
   h = 120,
+  exercise,
 }: {
   label?: string;
   h?: number;
   equipment?: string;
+  exercise?: { type: 'strength' | 'cardio' };
 }) {
   const pid = useUniqueId('stripes');
+  const iconName = exercise?.type === 'cardio' ? 'stopwatch' : 'dumbbell';
   return (
     <View
       style={{
@@ -453,7 +456,7 @@ export function ExerciseThumb({
         <Rect width="100%" height="100%" fill={`url(#${pid})`} />
       </Svg>
       <View style={{ alignItems: 'center', opacity: 0.5 }}>
-        <Icon name="dumbbell" size={26} color={COLORS.muted} />
+        <Icon name={iconName} size={26} color={COLORS.muted} />
         {label ? (
           <AppText
             style={{

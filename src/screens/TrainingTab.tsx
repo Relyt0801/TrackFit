@@ -408,7 +408,7 @@ function ExerciseCard({
       {bodyOpen ? (
         <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
           <View style={{ marginBottom: 10 }}>
-            <ExerciseThumb h={104} label={exercise.name} />
+            <ExerciseThumb h={104} label={exercise.name} exercise={exercise} />
           </View>
           {prev && !done ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 }}>
