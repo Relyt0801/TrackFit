@@ -426,7 +426,7 @@ export function ExerciseThumb({
   exercise?: { type: 'strength' | 'cardio' };
 }) {
   const pid = useUniqueId('stripes');
-  const iconName = exercise?.type === 'cardio' ? 'stopwatch' : 'dumbbell';
+  const iconName = exercise?.type === 'cardio' ? 'clock' : 'dumbbell';
   return (
     <View
       style={{

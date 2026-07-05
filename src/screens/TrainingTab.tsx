@@ -522,7 +522,7 @@ const getPlanIconName = (plan: { exerciseIds: string[] }, exMap: Record<string, 
   const exercises = plan.exerciseIds.map((id) => exMap[id]).filter(Boolean);
   if (exercises.length === 0) return 'dumbbell';
   const allCardio = exercises.every((ex) => ex.type === 'cardio');
-  return allCardio ? 'stopwatch' : 'dumbbell';
+  return allCardio ? 'clock' : 'dumbbell';
 };
 
 export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) => void }) {
