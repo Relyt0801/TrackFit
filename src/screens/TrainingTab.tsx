@@ -17,6 +17,7 @@ import {
   SetEntry,
 } from '../types';
 import { Icon } from '../components/Icon';
+import { BrandGlyph, BrandGlyphName } from '../components/ExerciseIcon';
 import { AppText } from '../components/Text';
 import {
   Checkbox,
@@ -408,7 +409,7 @@ function ExerciseCard({
       {bodyOpen ? (
         <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
           <View style={{ marginBottom: 10 }}>
-            <ExerciseThumb h={104} label={exercise.name} />
+            <ExerciseThumb h={104} label={exercise.name} exercise={exercise} />
           </View>
           {prev && !done ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 }}>
@@ -517,6 +518,16 @@ function buildGreeting(name: string) {
 }
 
 const isDone = (entry: SessionEntry) => entry.sets.length > 0 && entry.sets.every((s) => s.done);
+
+const getPlanGlyphName = (
+  plan: { exerciseIds: string[] },
+  exMap: Record<string, Exercise>,
+): BrandGlyphName => {
+  const exercises = plan.exerciseIds.map((id) => exMap[id]).filter(Boolean);
+  if (exercises.length === 0) return 'dumbbell';
+  const allCardio = exercises.every((ex) => ex.type === 'cardio');
+  return allCardio ? 'stopwatch' : 'dumbbell';
+};
 
 export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) => void }) {
   const insets = useSafeAreaInsets();
@@ -756,7 +767,7 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
                   justifyContent: 'center',
                 }}
               >
-                <Icon name="dumbbell" size={22} color={COLORS.accent} />
+                <BrandGlyph name={getPlanGlyphName(p, exMap)} size={22} color={COLORS.accent} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <AppText style={{ fontSize: 15, fontWeight: '800', color: COLORS.text }}>{p.name}</AppText>

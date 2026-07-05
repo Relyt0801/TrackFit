@@ -21,6 +21,7 @@ import { muscleColor } from '../data/color';
 import { MetricKey } from '../types';
 import { AppText, AppTextInput } from './Text';
 import { Icon } from './Icon';
+import { BrandGlyph } from './ExerciseIcon';
 import { selection } from '../utils/haptics';
 
 let uidCounter = 0;
@@ -418,12 +419,15 @@ export function Checkbox({
 export function ExerciseThumb({
   label = 'Übungsbild',
   h = 120,
+  exercise,
 }: {
   label?: string;
   h?: number;
   equipment?: string;
+  exercise?: { type: 'strength' | 'cardio' };
 }) {
   const pid = useUniqueId('stripes');
+  const glyphName = exercise?.type === 'cardio' ? 'stopwatch' : 'dumbbell';
   return (
     <View
       style={{
@@ -453,7 +457,7 @@ export function ExerciseThumb({
         <Rect width="100%" height="100%" fill={`url(#${pid})`} />
       </Svg>
       <View style={{ alignItems: 'center', opacity: 0.5 }}>
-        <Icon name="dumbbell" size={26} color={COLORS.muted} />
+        <BrandGlyph name={glyphName} size={26} color={COLORS.muted} />
         {label ? (
           <AppText
             style={{
