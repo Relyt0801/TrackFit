@@ -230,7 +230,7 @@ export function ExercisePickerSheet({
               }}
             >
               <View style={{ width: 54, height: 54 }}>
-                <ExerciseThumb h={54} label="" />
+                <ExerciseThumb h={54} label="" type={e.type} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <AppText style={{ fontSize: 14.5, fontWeight: '700', color: COLORS.text }}>{e.name}</AppText>

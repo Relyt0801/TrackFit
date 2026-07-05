@@ -17,6 +17,7 @@ import {
   SetEntry,
 } from '../types';
 import { Icon } from '../components/Icon';
+import { BrandGlyph } from '../components/ExerciseIcon';
 import { AppText } from '../components/Text';
 import {
   Checkbox,
@@ -408,7 +409,7 @@ function ExerciseCard({
       {bodyOpen ? (
         <View style={{ paddingHorizontal: 12, paddingBottom: 12 }}>
           <View style={{ marginBottom: 10 }}>
-            <ExerciseThumb h={104} label={exercise.name} />
+            <ExerciseThumb h={104} label={exercise.name} type={exercise.type} />
           </View>
           {prev && !done ? (
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 8 }}>
@@ -728,7 +729,11 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
           Trainingspläne
         </AppText>
         <View style={{ gap: 10 }}>
-          {plans.map((p) => (
+          {plans.map((p) => {
+            // Gruppen-Icon: Sanduhr, wenn der Plan mehrheitlich Cardio-Übungen enthält, sonst Hantel.
+            const cardioN = p.exerciseIds.filter((id) => exMap[id]?.type === 'cardio').length;
+            const primarilyCardio = cardioN * 2 > p.exerciseIds.length;
+            return (
             <Pressable
               key={p.id}
               onPress={() => startSession(p.id)}
@@ -756,7 +761,7 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
                   justifyContent: 'center',
                 }}
               >
-                <Icon name="dumbbell" size={22} color={COLORS.accent} />
+                <BrandGlyph name={primarilyCardio ? 'stopwatch' : 'dumbbell'} size={22} color={COLORS.accent} />
               </View>
               <View style={{ flex: 1, minWidth: 0 }}>
                 <AppText style={{ fontSize: 15, fontWeight: '800', color: COLORS.text }}>{p.name}</AppText>
@@ -766,7 +771,8 @@ export function TrainingTab({ onFinish }: { onFinish: (s: FinishSummary | null) 
               </View>
               <Icon name="chevR" size={18} color={COLORS.muted} />
             </Pressable>
-          ))}
+            );
+          })}
           {plans.length === 0 ? (
             <EmptyState icon="dumbbell" title="Noch keine Pläne" sub="Lege Trainingspläne in den Einstellungen an." />
           ) : null}

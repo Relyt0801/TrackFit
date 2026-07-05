@@ -18,9 +18,10 @@ import Svg, { Defs, Pattern, Rect } from 'react-native-svg';
 import { COLORS, RADIUS } from '../theme';
 import { METRICS, MUSCLES } from '../data/constants';
 import { muscleColor } from '../data/color';
-import { MetricKey } from '../types';
+import { MetricKey, ExerciseType } from '../types';
 import { AppText, AppTextInput } from './Text';
 import { Icon } from './Icon';
+import { BrandGlyph } from './ExerciseIcon';
 import { selection } from '../utils/haptics';
 
 let uidCounter = 0;
@@ -418,10 +419,11 @@ export function Checkbox({
 export function ExerciseThumb({
   label = 'Übungsbild',
   h = 120,
+  type,
 }: {
   label?: string;
   h?: number;
-  equipment?: string;
+  type?: ExerciseType;
 }) {
   const pid = useUniqueId('stripes');
   return (
@@ -453,7 +455,7 @@ export function ExerciseThumb({
         <Rect width="100%" height="100%" fill={`url(#${pid})`} />
       </Svg>
       <View style={{ alignItems: 'center', opacity: 0.5 }}>
-        <Icon name="dumbbell" size={26} color={COLORS.muted} />
+        <BrandGlyph name={type === 'cardio' ? 'stopwatch' : 'dumbbell'} size={26} color={COLORS.muted} />
         {label ? (
           <AppText
             style={{
