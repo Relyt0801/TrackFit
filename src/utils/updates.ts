@@ -2,7 +2,9 @@
 // On every cold start a built (non-dev) app asks the EAS Update server whether a newer
 // JS bundle exists for its channel + runtimeVersion; if so it downloads and reloads into
 // it. This lets us ship changes to all installed devices without a new APK or app store —
-// only native changes (new packages, SDK bumps, version change) still need a fresh build.
+// only native changes (new packages, SDK bumps, version change, launcher icon / splash
+// PNGs baked into the APK) still need a fresh build. In-app SVG icons are plain JS and
+// DO ship over-the-air.
 import { useEffect } from 'react';
 import * as Updates from 'expo-updates';
 

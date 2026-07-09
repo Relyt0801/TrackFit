@@ -86,9 +86,17 @@ startet direkt in die neue Version. Kein Store, keine Neuinstallation.
 | Änderung | Was tun |
 |---|---|
 | JS/TSX: Screens, Logik, Styles, Texte | `eas update` reicht ✅ |
+| **Icons in der App** (Tab‑Bar, Übungs‑Icons — Hantel, Stoppuhr, Zahnräder; laufen über `react-native-svg`) | `eas update` reicht ✅ |
+| **App‑Icon (Launcher) & Splash‑Screen** (`assets/*.png`, `icon`/`splash`/`adaptiveIcon` in `app.json`) | neuer `eas build` + 1× neu installieren 🔁 |
 | Neues **natives** Paket (z. B. Kamera, Notifications) | neuer `eas build` + 1× neu installieren 🔁 |
 | Expo‑SDK‑Upgrade | neuer `eas build` + 1× neu installieren 🔁 |
 | `version` in `app.json` erhöht | neuer `eas build` + 1× neu installieren 🔁 |
+
+> ⚠️ **App‑Icon und Splash‑Screen können grundsätzlich NICHT per OTA‑Update kommen.**
+> Sie werden beim Build fest in die APK eingebacken (Android zeigt das Launcher‑Icon,
+> bevor überhaupt JavaScript läuft). Ein `eas update` liefert nur das JS‑Bundle aus —
+> das neue orange Logo auf dem Homescreen erscheint erst nach `npm run build:apk`
+> und einmaligem Neu‑Installieren der APK.
 
 Grund: `runtimeVersion` ist an die `version` gekoppelt (Policy `appVersion`). OTA‑Updates
 werden nur an Builds mit **gleicher** `runtimeVersion` ausgeliefert. So kann eine alte
