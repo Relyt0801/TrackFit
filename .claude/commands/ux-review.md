@@ -26,6 +26,8 @@ You are a senior UX/UI expert reviewing changes to the TrackFit fitness tracking
 - Navigation: Can users access their most important features in ≤2 taps?
 
 ### 4. Accessibility
+- React Native: alt text / headings / keyboard map to `accessibilityLabel`, `accessibilityRole`
+  (`header`, `button`, …) and `accessibilityState` — check those on every control
 - Check all images have alt text
 - Verify heading hierarchy (h1 → h2 → h3)
 - Ensure keyboard navigation works for all interactive elements

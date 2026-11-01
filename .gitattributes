@@ -1,3 +1,5 @@
 # Windows-Skripte immer mit CRLF auschecken (cmd.exe verarbeitet LF-only-Batchdateien fehlerhaft)
 *.cmd text eol=crlf
 *.ps1 text eol=crlf
+# Shell-Skripte (Claude-Code-Hooks) immer mit LF - bash scheitert an CRLF, auch in Git Bash
+*.sh text eol=lf

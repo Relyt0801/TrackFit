@@ -43,12 +43,15 @@ When building components, follow these patterns:
 // Active state with fill icon (vs outline when inactive)
 ```
 
-### Technology Stack
-Detect the project's stack from package.json and use:
-- **React/Next.js**: TypeScript, Tailwind CSS, shadcn/ui or Radix UI
-- **Vue**: Composition API, UnoCSS or Tailwind
-- **Vanilla**: Web Components or plain HTML/CSS/JS
-- **React Native**: Expo, NativeWind
+### Technology Stack (TrackFit)
+- Expo SDK 56 / React Native 0.85 / React 19, TypeScript strict
+- Styling: plain React Native styles + tokens from `src/theme.ts` (`COLORS`, `RADIUS`, `fontFor`)
+  — **no** Tailwind/NativeWind or other styling libraries
+- Reuse primitives from `src/components/ui.tsx`, `Text.tsx`, `Icon.tsx`, `charts.tsx` (react-native-svg)
+- Haptics via `src/utils/haptics.ts`; dialogs via native `Alert`
+- German UI copy; `accessibilityRole` / `accessibilityLabel` / `accessibilityState` on all controls
+- **Do not add packages with native code** without the user's OK: they cannot ship as an
+  over-the-air update and force a new APK install on every device (see CLAUDE.md)
 
 ### After Building
 
