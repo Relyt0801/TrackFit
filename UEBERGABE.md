@@ -118,6 +118,7 @@ Probleme beim nativen Build.)
 
 | Datei | Inhalt |
 |---|---|
+| `ANLEITUNG.md` | Schnellstart (Programme, `Claude-starten.cmd`, Änderung zurückgeben) |
 | `CLAUDE.md` | Projektregeln für Claude (Architektur, Design, Update-Pflichten) |
 | `README.md` | Funktionen, Stack, Projektstruktur |
 | `ABLAUFPLAN.md` | Verteilung ohne Store, Online-Updates, wann ein neuer Build nötig ist |

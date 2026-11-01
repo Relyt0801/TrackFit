@@ -1,3 +1,8 @@
+---
+name: start
+description: Onboarding for a person who is new to TrackFit - greet in German, check the setup, explain the app briefly, then ask what should be changed and wait. Use when the session starts with /start, with a greeting but no concrete task, or when someone says they are new or asks for onboarding (the Claude-starten.cmd launcher sends such a message).
+---
+
 # Onboarding (/start)
 
 Welcome a person who is new to TrackFit and find out what they want to change.

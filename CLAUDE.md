@@ -11,7 +11,8 @@ start with [`ANLEITUNG.md`](ANLEITUNG.md) (quick start) and [`UEBERGABE.md`](UEB
 
 If the person is new to the project — the session starts with `/start`, a greeting without a
 concrete task, or a message saying they are new / asking for onboarding (the launcher
-`Claude-starten.cmd` sends such a message) — follow **`.claude/commands/start.md`**: greet in
+`Claude-starten.cmd` sends such a message) — follow the **`start` skill**
+(`.claude/skills/start/SKILL.md`): greet in
 German, check the setup, explain the app in a few sentences, then ask **„Was soll an TrackFit
 geändert werden?“** and wait. Don't modify files until they have said what they want.
 
