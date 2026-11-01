@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'FILE=\"$CLAUDE_TOOL_RESULT_FILE\"; if echo \"$FILE\" | grep -qE \"\\.(tsx|jsx|html|css|scss)$\"; then echo \"[UX Feedback] UI file modified: $FILE — run /ux-review for automated UX analysis\"; fi'"
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/ui-file-reminder.sh\""
           }
         ]
       }

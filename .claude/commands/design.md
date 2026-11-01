@@ -6,42 +6,46 @@ Create, update, or sync UI designs for TrackFit using the Canva MCP integration.
 
 You are a UI designer working on TrackFit, a fitness tracking app. Use the available Canva MCP tools to create and manage design assets.
 
+> **Tool names:** use the Canva MCP tools connected in *your* session — the prefix depends on
+> how the connector is installed (e.g. `mcp__Canva__search-designs`). If no Canva connector is
+> connected, tell the user and stop instead of guessing tool names.
+
 ### Capabilities
 
 **Search existing designs:**
-Use `mcp__233f22b9-8aaf-4828-bad0-2e49184a8aab__search-designs` to find existing TrackFit designs before creating new ones.
+Use Canva `search-designs` to find existing TrackFit designs before creating new ones.
 
 **Create new designs:**
-Use `mcp__233f22b9-8aaf-4828-bad0-2e49184a8aab__generate-design` or `mcp__233f22b9-8aaf-4828-bad0-2e49184a8aab__generate-design-structured` for AI-generated designs.
+Use Canva `generate-design` or `generate-design-structured` for AI-generated designs.
 
 **Get design assets:**
-Use `mcp__233f22b9-8aaf-4828-bad0-2e49184a8aab__get-assets` to retrieve brand colors, fonts, and components.
+Use Canva `get-assets` to retrieve brand colors, fonts, and components.
 
 **Check brand kits:**
-Use `mcp__233f22b9-8aaf-4828-bad0-2e49184a8aab__list-brand-kits` to ensure designs align with brand guidelines.
+Use Canva `list-brand-kits` to ensure designs align with brand guidelines.
 
 **Export designs:**
-Use `mcp__233f22b9-8aaf-4828-bad0-2e49184a8aab__export-design` to export as PNG/SVG/PDF for use in code.
+Use Canva `export-design` to export as PNG/SVG/PDF for use in code.
 
 ### TrackFit Design System
 
-**Brand Colors:**
-- Primary: Energetic blue (#2563EB) or green (#16A34A) for fitness
-- Accent: Orange (#EA580C) for CTAs and achievements
-- Background: Light (#F9FAFB), Dark (#111827)
-- Success: Green (#22C55E), Warning: Amber (#F59E0B), Error: Red (#EF4444)
+**Brand Colors** (source of truth: `src/theme.ts` — dark theme only):
+- Background `#0c0d11`, surfaces `#16181d` / `#1f222a`, borders `#272a32`
+- Text `#f3f5f8`, muted `#888e9c`
+- Accent / CTA: orange `#ff8a3d` (ink on accent `#0d0f08`)
+- Good / progress: `#34d399`, Danger: `#ff6f6f`
+- Card radius 18 ("Weich"); brand glyphs in `assets/svg/` (logo, dumbbell, stopwatch)
 
 **Typography:**
-- Headings: Bold, large for stats and numbers
+- Font: Manrope (400–800), headings bold, large for stats and numbers
 - Body: Clean, readable for instructions and descriptions
 - Numbers/Stats: Prominent, use tabular figures
 
-**Components to design:**
-- Workout cards with progress rings
-- Nutrition tracking dashboard
-- Goal progress bars
-- Achievement badges
-- Weekly activity charts
+**Screens to design** (German UI copy):
+- Training: start session, live set logging, rest timer
+- Übersicht: compact per-exercise progress cards
+- Diagramme: per-exercise progress charts + personal bests
+- Einstellungen: training plans, exercise library, data reset
 
 ### Workflow
 

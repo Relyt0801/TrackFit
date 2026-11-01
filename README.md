@@ -11,8 +11,12 @@ Alle Daten werden lokal auf dem Gerät gespeichert (AsyncStorage, kein Backend).
 ## Tabs
 
 1. **Training** – Session starten, Sätze live loggen, Rest-Timer, beenden.
-2. **Diagramme** – Fortschritts-Charts pro Übung + Bestwerte.
-3. **Einstellungen** – Trainingspläne, Übungs-Bibliothek, Daten zurücksetzen.
+2. **Übersicht** – kompakter Fortschritt aller Übungen (letzte Einheit + Veränderung).
+3. **Diagramme** – Fortschritts-Charts pro Übung + Bestwerte.
+4. **Einstellungen** – Trainingspläne, Übungs-Bibliothek, Daten zurücksetzen.
+
+> **Neu im Projekt?** Starte mit [UEBERGABE.md](UEBERGABE.md) – Zugänge, Einrichtung und
+> Arbeiten mit Claude Code.
 
 ## Stack
 
@@ -25,6 +29,7 @@ Alle Daten werden lokal auf dem Gerät gespeichert (AsyncStorage, kein Backend).
 - **expo-haptics** – haptisches Feedback
 - **expo-keep-awake** – Display bleibt im Training an
 - **expo-splash-screen** – sauberer Start ohne Flackern
+- **expo-updates** – Online-Updates (EAS Update) ohne App-Store
 
 ## UX-Feinschliff
 
@@ -54,13 +59,28 @@ npm run web        # Browser
 
 App in **Expo Go** (iOS/Android) öffnen, indem du den QR-Code scannst.
 
+## Updates & Installation auf den Handys
+
+- **Normal:** `npm run update` → alle installierten Apps holen sich das Update beim nächsten
+  Start (EAS Update, ohne Store). Ablauf & wann ein neuer Build nötig ist: [ABLAUFPLAN.md](ABLAUFPLAN.md)
+- **Notfall (Online-Weg geht nicht):** Installation per **USB-C & PowerShell** mit
+  `scripts\USB-Installieren.cmd` bzw. lokaler Build mit `scripts\APK-lokal-bauen.cmd` —
+  Anleitung: [USB-INSTALLATION.md](USB-INSTALLATION.md)
+
 ## Projektstruktur
 
 ```
 TrackFit/
-├── App.tsx                     # Root: Fonts, Store, Tabs, Tab-Bar, Toast
+├── App.tsx                     # Root: Fonts, Store, Tabs, Tab-Bar, Toast, OTA-Update-Check
 ├── index.ts                    # Expo-Entry (registerRootComponent)
-├── app.json                    # Expo-Konfiguration (Dark-Theme)
+├── app.json                    # Expo-Konfiguration (Dark-Theme, EAS Update, Paketname)
+├── eas.json                    # EAS-Build-Profile (preview = APK) + Update-Channels
+├── CLAUDE.md                   # Projektregeln für Claude Code
+├── UEBERGABE.md                # Einstieg für neue Mitarbeitende
+├── ABLAUFPLAN.md               # Verteilung ohne Store + Online-Updates
+├── USB-INSTALLATION.md         # Notfall-Installation per USB-C & PowerShell
+├── scripts/                    # usb-install.ps1, build-apk-local.ps1 (+ Doppelklick-.cmd)
+├── assets/                     # App-Icon, Splash, svg/ (Marken-Glyphen)
 └── src/
     ├── theme.ts                # Design-Tokens (Farben, Radien, Font-Mapping)
     ├── types.ts                # Domänen-Typen
@@ -69,10 +89,11 @@ TrackFit/
     │   ├── color.ts            # OKLCH→sRGB + muscleColor()
     │   ├── helpers.ts          # uid, Datum, epley1RM, seriesFor, …
     │   └── seed.ts             # Start-Übungen, Pläne, 8-Wochen-Verlauf
-    ├── store/store.tsx         # StoreProvider (AsyncStorage)
-    ├── components/             # Icon, Text/TextInput, ui-Primitives, charts, TabBar, Toast
+    ├── store/store.tsx         # StoreProvider (AsyncStorage, Schlüssel trackfit_v2)
+    ├── components/             # Icon, ExerciseIcon, Text/TextInput, ui-Primitives, charts, TabBar, Toast
     ├── forms/ExerciseForms.tsx # Übungs-Picker & -Editor (Bottom-Sheets)
-    └── screens/                # TrainingTab, StatsTab, SettingsTab
+    ├── screens/                # TrainingTab, OverviewTab, StatsTab, SettingsTab
+    └── utils/                  # haptics, updates (OTA-Update beim Start)
 ```
 
 ## Design-Tokens

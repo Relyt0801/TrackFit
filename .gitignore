@@ -29,6 +29,21 @@ yarn-error.*
 # local env
 .env*.local
 
+# Native-Ordner: werden bei Bedarf von "expo prebuild" erzeugt (scripts/build-apk-local.ps1).
+# Muessen ignoriert bleiben, sonst behandelt EAS Build das Projekt nicht mehr als "managed".
+/android/
+/ios/
+
+# USB-Fallback: heruntergeladene/gebaute APKs, lokales adb
+/releases/
+/tools/
+*.apk
+*.idsig
+
+# EAS-Signaturschluessel (eas credentials) - NIEMALS committen, sicher aufbewahren!
+credentials.json
+/credentials/
+
 # IDE
 .idea/
 .vscode/
