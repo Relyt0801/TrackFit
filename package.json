@@ -9,7 +9,10 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "build:apk": "eas build --platform android --profile preview",
-    "update": "eas update --branch preview --message \"Update\""
+    "update": "eas update --branch preview --message \"Update\"",
+    "apk:download": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/usb-install.ps1 -Download -NoInstall",
+    "usb:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/usb-install.ps1",
+    "build:apk:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-apk-local.ps1"
   },
   "dependencies": {
     "@expo-google-fonts/manrope": "^0.2.3",

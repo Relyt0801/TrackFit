@@ -53,8 +53,35 @@ TrackFit/
 │       ├── ui-agent.md
 │       └── feedback.md
 ├── CLAUDE.md             # This file
+├── ABLAUFPLAN.md         # Store-free distribution + OTA updates (EAS Update)
+├── USB-INSTALLATION.md   # Fallback: install/update via USB-C + PowerShell
+├── scripts/              # usb-install.ps1, build-apk-local.ps1 (+ double-click .cmd)
 └── src/                  # App source code
 ```
+
+## Shipping Updates to Installed Devices (after EVERY app change)
+
+TrackFit is distributed without a store: devices run an EAS-built APK (profile/channel
+`preview`, `runtimeVersion` = `expo.version` via the `appVersion` policy). All user data is
+local only (AsyncStorage) — **uninstalling the app deletes it**.
+
+After every change to the app, always:
+1. **Verify:** `npm run typecheck` and `npx expo export --platform android --output-dir /tmp/tf-export`
+   (that is the bundle `eas update` publishes).
+2. **Decide OTA vs. new APK** (table in `ABLAUFPLAN.md`): JS/TS/assets only → OTA; new native
+   module, Expo SDK bump, `version` bump or native `app.json` config → new APK build.
+3. **Hand the user both ways** (cloud sessions cannot reach expo.dev and have no `EXPO_TOKEN`):
+   - Online: `eas update --branch preview --message "<what changed>"` (or `eas build` + install)
+   - Fallback if online fails: USB-C + PowerShell — `scripts\USB-Installieren.cmd -Download`
+     (EAS APK) or `scripts\APK-lokal-bauen.cmd` (local build signed with the EAS keystore).
+4. **Keep the fallback working:** if `app.json`, `eas.json` or native deps change, re-check the
+   scripts (package + version are read from `app.json`; channel `preview` is set in both
+   scripts) and smoke-test `pwsh scripts/build-apk-local.ps1 -PrepareOnly` in a scratch copy.
+
+Never change `android.package`, replace the signing keystore, or commit `credentials.json`,
+`credentials/`, `*.jks` or APKs — a signature/package change forces an uninstall (= data loss).
+PowerShell scripts must stay ASCII-only and Windows PowerShell 5.1 compatible (no `??`, ternary,
+`&&`, multi-part `Join-Path`, `$IsWindows`); `.gitattributes` checks them out with CRLF.
 
 ## Git Workflow
 

@@ -30,7 +30,10 @@ Diese App nutzt jetzt **EAS Update** (Over‑the‑Air‑Updates). Das heißt: N
 
 ---
 
-## 1. Projekt mit EAS verbinden (einmalig)
+## 1. Projekt mit EAS verbinden (einmalig) — ✅ erledigt am 02.07.2026
+
+> `app.json` enthält bereits `extra.eas.projectId` und `updates.url`
+> (Projekt `a5d7e496-…`, Owner `relyt0801`). Nur bei einem neuen Expo-Konto wiederholen.
 
 Im Projektordner (dort, wo die `package.json` liegt):
 
@@ -78,6 +81,27 @@ eas update --branch preview --message "Was wurde geändert"
 
 → Beim **nächsten App‑Start** prüft jedes Gerät automatisch, lädt das Update und
 startet direkt in die neue Version. Kein Store, keine Neuinstallation.
+App dafür ganz schließen (aus der App‑Übersicht wischen) und neu öffnen.
+
+> **Update kommt nicht an?** (Handy offline, Update‑Server gestört, App älter als die
+> Update‑Einrichtung, nativer Build nötig) → **Weg B/C per USB‑C & PowerShell**, siehe
+> [USB-INSTALLATION.md](USB-INSTALLATION.md).
+
+---
+
+## 4. Notfall‑Plan: Installation per USB‑C & PowerShell
+
+Falls die Online‑Funktion nicht geht, liegt alles für die Installation per Kabel bereit:
+
+| Situation | Doppelklick / Befehl |
+|---|---|
+| Neueste EAS‑APK laden und per USB installieren | `scripts\USB-Installieren.cmd -Download` |
+| Schon geladene APK aus `releases\` installieren (offline) | `scripts\USB-Installieren.cmd` |
+| expo.dev nicht erreichbar → lokal bauen + installieren | `scripts\APK-lokal-bauen.cmd` |
+
+Die App wird dabei **über** die vorhandene installiert – Trainingsdaten bleiben erhalten.
+Einmalige Vorbereitung (USB‑Debugging, Signatur‑Schlüssel sichern, APK vorab laden) und
+Fehlerbehebung: **[USB-INSTALLATION.md](USB-INSTALLATION.md)**.
 
 ---
 
@@ -104,6 +128,8 @@ App nie ein inkompatibles Update bekommen.
 - `src/utils/updates.ts` + Aufruf in `App.tsx`: prüft beim Start auf ein Update, lädt es
   und startet automatisch hinein. In der Entwicklung / in Expo Go passiert nichts (no‑op).
 - `npm run build:apk` und `npm run update` als Kurzbefehle.
+- `scripts\` mit dem USB‑Notfall‑Weg (`usb-install.ps1`, `build-apk-local.ps1` + Doppelklick‑`.cmd`)
+  sowie `npm run apk:download`, `npm run usb:install`, `npm run build:apk:local`.
 
 ---
 

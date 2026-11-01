@@ -54,6 +54,14 @@ npm run web        # Browser
 
 App in **Expo Go** (iOS/Android) öffnen, indem du den QR-Code scannst.
 
+## Updates & Installation auf den Handys
+
+- **Normal:** `npm run update` → alle installierten Apps holen sich das Update beim nächsten
+  Start (EAS Update, ohne Store). Ablauf & wann ein neuer Build nötig ist: [ABLAUFPLAN.md](ABLAUFPLAN.md)
+- **Notfall (Online-Weg geht nicht):** Installation per **USB-C & PowerShell** mit
+  `scripts\USB-Installieren.cmd` bzw. lokaler Build mit `scripts\APK-lokal-bauen.cmd` —
+  Anleitung: [USB-INSTALLATION.md](USB-INSTALLATION.md)
+
 ## Projektstruktur
 
 ```
