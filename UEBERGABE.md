@@ -13,10 +13,18 @@ auf die Geräte; als Notfall gibt es die Installation per **USB-C & PowerShell**
 
 ## Teil 1 – Für den bisherigen Owner: Zugänge freigeben
 
-### 1. GitHub (Pflicht)
-Repo **Relyt0801/TrackFit** → *Settings* → *Collaborators* → *Add people* → GitHub-Name der
-neuen Person (Rolle **Write**). Sie arbeitet dann mit Branches und Pull Requests; du
-reviewst und mergst.
+### 1. Code weitergeben: GitHub (empfohlen) oder ZIP
+**GitHub:** Repo **Relyt0801/TrackFit** → *Settings* → *Collaborators* → *Add people* →
+GitHub-Name der neuen Person (Rolle **Write**). Sie arbeitet dann mit Branches und Pull
+Requests; du reviewst und mergst.
+
+**ZIP:** Projektordner als ZIP weitergeben (mit `.git`-Ordner, ohne `node_modules`). Die Person
+startet mit `ANLEITUNG.md`. Ohne GitHub-Zugang schickt sie dir ihre Änderungen als
+**Patch-Datei** (Claude erzeugt sie); du spielst sie im Projektordner ein mit:
+```bash
+git am TrackFit-aenderung.patch
+```
+Danach wie gewohnt prüfen, pushen und veröffentlichen.
 
 ### 2. Expo / EAS (nur wenn die Person selbst Updates veröffentlichen oder APKs bauen soll)
 Das Expo-Projekt gehört dem Konto **relyt0801**. Zwei Möglichkeiten:
@@ -48,6 +56,9 @@ Konto – die Projekt-Commands sind dafür nicht an dein Konto gebunden.
 
 ## Teil 2 – Für die neue Person: Einstieg
 
+> **Kurzfassung:** [`ANLEITUNG.md`](ANLEITUNG.md) – Programme installieren, Doppelklick auf
+> `Claude-starten.cmd`, Claude fragt dich dann, was geändert werden soll. Hier folgen die Details.
+
 ### 1. Einrichten (ca. 15 Minuten)
 Voraussetzungen: **Git**, **Node.js LTS** (https://nodejs.org), **Claude Code**, ein Handy mit
 **Expo Go** (Play Store) zum Ausprobieren.
@@ -63,15 +74,17 @@ QR-Code mit Expo Go scannen → die App läuft live, Änderungen erscheinen sofo
 Probleme beim nativen Build.)
 
 ### 2. Mit Claude arbeiten
-- **Claude Code im Projektordner starten.** Claude liest `CLAUDE.md` automatisch: Architektur,
+- **Claude Code im Projektordner starten** – unter Windows per Doppelklick auf
+  `Claude-starten.cmd`, sonst `/start` eingeben. Claude begrüßt dich, prüft die Einrichtung und
+  fragt, was geändert werden soll. `CLAUDE.md` liest Claude automatisch: Architektur,
   Design-Tokens, Datenschutz-Regeln für gespeicherte Daten und der Update-Ablauf stehen dort.
-- **Guter erster Auftrag:**
-  *„Lies dich ins Projekt ein (CLAUDE.md, README.md, ABLAUFPLAN.md) und erklär mir die
-  Architektur und wie ein Update auf die Handys kommt.“*
+- **Guter erster Auftrag, wenn du erst verstehen willst:**
+  *„Erklär mir die Architektur und wie ein Update auf die Handys kommt.“*
 - **Projekt-Commands** (Slash-Commands in Claude Code):
 
   | Command | Wofür |
   |---|---|
+  | `/start` | Begrüßung, Einrichtungs-Check, Frage „Was soll geändert werden?“ |
   | `/ux-review` | UX/UI-Prüfung der letzten Änderungen – **vor jedem Commit mit UI-Änderungen** |
   | `/ui-agent` | Neue UI-Komponente im Stil der App bauen |
   | `/feedback` | Ausführlicher UX-Feedback-Bericht – **vor einem PR mit UI-Änderungen** |
