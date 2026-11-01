@@ -5,7 +5,16 @@ It is distributed **without an app store** (Android APK built by EAS + over-the-
 small group of real users. All data lives **only on the device** (AsyncStorage, no backend).
 
 The team works in **German**: UI copy, docs and commit messages are German. New contributors
-start with [`UEBERGABE.md`](UEBERGABE.md).
+start with [`ANLEITUNG.md`](ANLEITUNG.md) (quick start) and [`UEBERGABE.md`](UEBERGABE.md).
+
+## First Contact / Onboarding
+
+If the person is new to the project — the session starts with `/start`, a greeting without a
+concrete task, or a message saying they are new / asking for onboarding (the launcher
+`Claude-starten.cmd` sends such a message) — follow the **`start` skill**
+(`.claude/skills/start/SKILL.md`): greet in
+German, check the setup, explain the app in a few sentences, then ask **„Was soll an TrackFit
+geändert werden?“** and wait. Don't modify files until they have said what they want.
 
 ## Quick Facts
 
@@ -75,6 +84,7 @@ Dark theme only. Use the tokens — don't hardcode colors.
 
 | Command | Description |
 |---------|-------------|
+| `/start` | Onboarding for new people: setup check, short intro, ask what to change |
 | `/ux-review` | Run a full UX/UI audit on recent changes |
 | `/ui-agent` | Build new UI components with best practices |
 | `/feedback` | Generate a comprehensive UX feedback report |
@@ -124,6 +134,7 @@ PowerShell scripts must stay ASCII-only and Windows PowerShell 5.1 compatible (n
 
 | File | Content |
 |---|---|
+| `ANLEITUNG.md` | Quick start for a new person (e.g. received the project as a ZIP) |
 | `UEBERGABE.md` | Handover / onboarding: access, setup, working with Claude |
 | `README.md` | Features, stack, setup |
 | `ABLAUFPLAN.md` | Store-free distribution, OTA updates, when a new build is needed |

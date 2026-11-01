@@ -15,8 +15,9 @@ Alle Daten werden lokal auf dem Gerät gespeichert (AsyncStorage, kein Backend).
 3. **Diagramme** – Fortschritts-Charts pro Übung + Bestwerte.
 4. **Einstellungen** – Trainingspläne, Übungs-Bibliothek, Daten zurücksetzen.
 
-> **Neu im Projekt?** Starte mit [UEBERGABE.md](UEBERGABE.md) – Zugänge, Einrichtung und
-> Arbeiten mit Claude Code.
+> **Neu im Projekt?** Starte mit [ANLEITUNG.md](ANLEITUNG.md) (Doppelklick auf
+> `Claude-starten.cmd`, Claude fragt dann, was geändert werden soll). Details zu Zugängen und
+> Arbeitsablauf: [UEBERGABE.md](UEBERGABE.md).
 
 ## Stack
 
@@ -76,7 +77,9 @@ TrackFit/
 ├── app.json                    # Expo-Konfiguration (Dark-Theme, EAS Update, Paketname)
 ├── eas.json                    # EAS-Build-Profile (preview = APK) + Update-Channels
 ├── CLAUDE.md                   # Projektregeln für Claude Code
-├── UEBERGABE.md                # Einstieg für neue Mitarbeitende
+├── ANLEITUNG.md                # Schnellstart für neue Personen
+├── Claude-starten.cmd          # Doppelklick: Claude starten (Onboarding mit /start)
+├── UEBERGABE.md                # Zugänge, Arbeitsablauf, Übergabe-Checkliste
 ├── ABLAUFPLAN.md               # Verteilung ohne Store + Online-Updates
 ├── USB-INSTALLATION.md         # Notfall-Installation per USB-C & PowerShell
 ├── scripts/                    # usb-install.ps1, build-apk-local.ps1 (+ Doppelklick-.cmd)

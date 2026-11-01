@@ -40,6 +40,9 @@ yarn-error.*
 *.apk
 *.idsig
 
+# Patch-Dateien zum Weitergeben von Aenderungen (git format-patch) - nicht committen
+*.patch
+
 # EAS-Signaturschluessel (eas credentials) - NIEMALS committen, sicher aufbewahren!
 credentials.json
 /credentials/
